@@ -381,12 +381,49 @@
             transition: width 0.3s ease;
         }
         .answer-content {
-            line-height: 1.6;
+            line-height: 1.8;
             color: #333;
+            font-size: 15px;
         }
         .answer-content h3 {
             color: #667eea;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+        .answer-content .step-box {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 8px 0;
+        }
+        .answer-content .step-label {
+            font-weight: bold;
+            color: #764ba2;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .answer-content .result-box {
+            background: linear-gradient(135deg, #e8f4fd, #f0f4ff);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+        }
+        .answer-content .verify-box {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            color: #155724;
+            font-size: 14px;
         }
         .answer-content ul {
             margin-left: 20px;
@@ -398,7 +435,17 @@
         .answer-content strong {
             color: #667eea;
         }
+        .math-hint {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #856404;
+        }
     </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -445,9 +492,12 @@
 
             <textarea id="intrebare" rows="6" placeholder="Scrie aici problema sau întrebarea ta... 
 
-Exemple:
-• 'Calculează: 2x + 5 = 15'
-• 'Analizează versurile: Plouă, plouă...'"></textarea>
+Exemple matematică:
+• '8 ori 7' sau '8 * 7'
+• '2x + 5 = 15'
+• '25% din 80'
+• 'x^2 - 5x + 6 = 0'
+• '(3 + 4) * 2 - 1'"></textarea>
 
             <button class="btn-primary" onclick="rezolva()">🔍 Rezolvă</button>
 
@@ -523,525 +573,799 @@ Exemple:
     </div>
 
     <script>
-        // Language translations
-        const translations = {
-            ro: {
-                homework: "🎓 Rezolvător de Teme - StudyBot 3000",
-                quiz: "🎮 Quiz Interactiv",
-                selectSubject: "Selectează materia...",
-                selectClass: "Selectează clasa...",
-                writeQuestion: "Scrie aici problema sau întrebarea ta...",
-                solve: "🔍 Rezolvă",
-                startQuiz: "▶️ Începe Quiz-ul",
-                login: "🔐 Log In",
-                signup: "✨ Create Account",
-                continue: "Continuă",
-                thinking: "⏳ Se gândește... Așteaptă câteva secunde...",
-                answer: "✅ Răspuns:",
-                homeworkBtn: "📝 Rezolvă Teme",
-                quizBtn: "🎮 Quiz Interactiv",
-                examples: "Exemple:\n• 'Calculează: 2x + 5 = 15'\n• 'Analizează versurile: Plouă, plouă...'",
-                history: "📚 Istoric",
-                question: "Întrebarea",
-                finalScore: "Scor final",
-                congratulations: "Felicitări! Ai completat quiz-ul cu scorul de",
-                correct: "Corect",
-                wrong: "Greșit",
-                all: "Toate",
-                homeworkFilter: "Teme",
-                quizFilter: "Quiz-uri",
-                emptyHistory: "Nu există activități în istoric",
-                clearHistory: "🗑️ Șterge Istoricul"
-            },
-            en: {
-                homework: "🎓 Homework Solver - StudyBot 3000",
-                quiz: "🎮 Interactive Quiz",
-                selectSubject: "Select subject...",
-                selectClass: "Select grade...",
-                writeQuestion: "Write your problem or question here...",
-                solve: "🔍 Solve",
-                startQuiz: "▶️ Start Quiz",
-                login: "🔐 Log In",
-                signup: "✨ Create Account",
-                continue: "Continue",
-                thinking: "⏳ Thinking... Please wait a few seconds...",
-                answer: "✅ Answer:",
-                homeworkBtn: "📝 Solve Homework",
-                quizBtn: "🎮 Interactive Quiz",
-                examples: "Examples:\n• 'Calculate: 2x + 5 = 15'\n• 'Analyze the verses: It's raining, raining...'",
-                history: "📚 History",
-                question: "Question",
-                finalScore: "Final Score",
-                congratulations: "Congratulations! You completed the quiz with a score of",
-                correct: "Correct",
-                wrong: "Wrong",
-                all: "All",
-                homeworkFilter: "Homework",
-                quizFilter: "Quizzes",
-                emptyHistory: "No activities in history",
-                clearHistory: "🗑️ Clear History"
-            }
-        };
+    // ═══════════════════════════════════════════════════════════════════
+    //  MATH ENGINE — real computation, no fake templates for matematica
+    // ═══════════════════════════════════════════════════════════════════
 
-        // Simulated AI responses database
-        const simulatedResponses = {
-            ro: {
-                matematica: "Pentru a rezolva această problemă, vom urma pașii:<br><br>1. <strong>Analizăm datele</strong> problemei<br>2. <strong>Aplicăm formula</strong> potrivită<br>3. <strong>Verificăm</strong> rezultatul<br><br><strong>Soluție:</strong><br>Dacă avem ecuația de gradul I, izolăm necunoscuta pe o parte și termenii cunoscuți pe cealaltă parte.<br><br>Exemplu: 2x + 5 = 15<br>→ 2x = 15 - 5<br>→ 2x = 10<br>→ x = 5<br><br><strong>Verificare:</strong> 2(5) + 5 = 10 + 5 = 15 ✓",
-                romana: "Analiza textului:<br><br><strong>Tema:</strong> Dragostea, natura, viața satului, relațiile umane<br><br><strong>Figuri de stil identificate:</strong><br>• <strong>Epitet:</strong> 'zâmbet blând', 'soare cald'<br>• <strong>Comparație:</strong> 'ca', 'precum', 'ca și'<br>• <strong>Metaforă:</strong> 'ochii stele', 'inima de piatră'<br>• <strong>Personificare:</strong> natura înveselește, vântul cântă<br><br><strong>Mesajul:</strong> Autorul transmite emoții pozitive/negative prin descrierea naturii și a personajelor.",
-                fizica: "Rezolvare problemă fizică:<br><br><strong>Datele problemei:</strong><br>- Notăm mărimile cunoscute<br>- Identificăm necunoscuta<br><br><strong>Formule necesare:</strong><br>- F = m × a (a doua lege a lui Newton)<br>- v = d / t (viteza)<br>- E = m × g × h (energia potențială)<br><br><strong>Rezolvare:</strong><br>1. Transformăm unitățile în SI<br>2. Înlocuim în formulă<br>3. Calculăm numeric<br>4. Verificăm unitatea de măsură",
-                chimie: "Rezolvare problemă chimică:<br><br><strong>Reacția chimică:</strong><br>[Reactanți] → [Produși]<br><br><strong>Ecuația balanceată:</strong><br>Coeficienții stoechiometrici asigură conservarea masei<br><br><strong>Pași de calcul:</strong><br>1. Calculăm masele moleculare<br>2. Stabilim raportul molar<br>3. Aplicăm regula de trei simplă<br>4. Determinăm cantitatea cerută",
-                istorie: "Analiza evenimentului istoric:<br><br><strong>Context:</strong><br>- Perioada: [anii]<br>- Locația: [țara/regiunea]<br>- Situația politică/socială/economică anterioră<br><br><strong>Cauze:</strong><br>• Cauze imediate (declanșatoare)<br>• Cauze profunde (structurale)<br><br><strong>Desfășurare:</strong><br>- Evenimentele principale în ordine cronologică<br>- Actorii implicați (persoane, grupuri, state)<br>- Decizii importante luate",
-                geografie: "Descriere geografică:<br><br><strong>Localizare:</strong><br>- Continent: <br>- Țară: <br>- Coordonate: <br><br><strong>Relieful:</strong><br>• Forme majore (munți, câmpii, podișuri)<br>- Altitudine maximă/minimă<br>- Caracteristici speciale<br><br><strong>Clima:</strong><br>- Tip de climă<br>- Temperaturi medii<br>- Precipitații",
-                biologie: "Descriere sistem biologic:<br><br><strong>Structură:</strong><br>- Componente anatomice<br>- Organizare (celulară, tisulară, organică)<br><br><strong>Funcții principale:</strong><br>• Rolul în organism<br>• Mecanisme de funcționare<br>- Reglare și control<br><br><strong>Importanță:</strong><br>- Pentru supraviețuire<br>- Pentru echilibrul organismului",
-                engleza: "Explicație gramaticală:<br><br><strong>Regula:</strong><br>Când și cum se folosește?<br><br><strong>Structură:</strong><br>- Forma afirmativă<br>- Forma negativă<br>- Forma interogativă<br><br><strong>Exemple:</strong><br>• Propoziții model<br>• Situații de utilizare<br><br><strong>Excepții:</strong><br>- Cazuri speciale<br>- Verbe neregulate"
-            },
-            en: {
-                matematica: "Step-by-step solution:<br><br>1. <strong>Analyze</strong> the given data<br>2. <strong>Apply</strong> the appropriate formula<br>3. <strong>Verify</strong> the result<br><br><strong>Solution:</strong><br>For linear equations, isolate the variable on one side.<br><br>Example: 2x + 5 = 15<br>→ 2x = 15 - 5<br>→ 2x = 10<br>→ x = 5<br><br><strong>Check:</strong> 2(5) + 5 = 10 + 5 = 15 ✓",
-                romana: "Text analysis:<br><br><strong>Theme:</strong> Love, nature, village life, human relationships<br><br><strong>Literary devices:</strong><br>• <strong>Epithet:</strong> 'gentle smile', 'warm sun'<br>• <strong>Simile:</strong> 'like', 'as'<br>• <strong>Metaphor:</strong> 'star eyes', 'heart of stone'<br>• <strong>Personification:</strong> nature rejoices, wind sings<br><br><strong>Message:</strong> The author conveys positive/negative emotions through nature and character descriptions.",
-                fizica: "Physics problem solution:<br><br><strong>Given data:</strong><br>- Note known quantities<br>- Identify the unknown<br><br><strong>Required formulas:</strong><br>- F = m × a (Newton's second law)<br>- v = d / t (velocity)<br>- E = m × g × h (potential energy)<br><br><strong>Solution:</strong><br>1. Convert units to SI<br>2. Substitute into formula<br>3. Calculate numerically<br>4. Check units",
-                chimie: "Chemistry problem solution:<br><br><strong>Chemical reaction:</strong><br>[Reactants] → [Products]<br><br><strong>Balanced equation:</strong><br>Stoichiometric coefficients ensure mass conservation<br><br><strong>Calculation steps:</strong><br>1. Calculate molecular masses<br>2. Establish molar ratio<br>3. Apply simple proportion<br>4. Determine required quantity",
-                istorie: "Historical event analysis:<br><br><strong>Context:</strong><br>- Period: [years]<br>- Location: [country/region]<br>- Previous political/social/economic situation<br><br><strong>Causes:</strong><br>• Immediate causes (triggers)<br>• Deep causes (structural)<br><br><strong>Development:</strong><br>- Main events in chronological order<br>- Actors involved (people, groups, states)<br>- Important decisions made",
-                geografie: "Geographic description:<br><br><strong>Location:</strong><br>- Continent: <br>- Country: <br>- Coordinates: <br><br><strong>Relief:</strong><br>• Major forms (mountains, plains, hills)<br>- Maximum/minimum altitude<br>- Special characteristics<br><br><strong>Climate:</strong><br>- Climate type<br>- Average temperatures<br>- Precipitation",
-                biologie: "Biological system description:<br><br><strong>Structure:</strong><br>- Anatomical components<br>- Organization (cellular, tissue, organic)<br><br><strong>Main functions:</strong><br>• Role in organism<br>• Operating mechanisms<br>- Regulation and control<br><br><strong>Importance:</strong><br>- For survival<br>- For organism balance",
-                engleza: "Grammar explanation:<br><br><strong>Rule:</strong><br>When and how to use it?<br><br><strong>Structure:</strong><br>- Affirmative form<br>- Negative form<br>- Interrogative form<br><br><strong>Examples:</strong><br>• Model sentences<br>- Usage situations<br><br><strong>Exceptions:</strong><br>- Special cases<br>- Irregular verbs"
-            }
-        };
+    const MathEngine = (() => {
 
-        let currentLang = 'ro';
-        let currentMode = 'homework';
-        let currentQuestion = 0;
-        let quizScore = 0;
-        let quizQuestions = [];
-        let currentFilter = 'all';
-
-        // Initialize history from localStorage
-        let activityHistory = JSON.parse(localStorage.getItem('studybot_history')) || [];
-
-        function changeLanguage() {
-            currentLang = document.getElementById('langSelect').value;
-            const t = translations[currentLang];
-            
-            document.getElementById('homework-title').textContent = t.homework;
-            document.getElementById('quiz-title').textContent = t.quiz;
-            document.getElementById('intrebare').placeholder = t.writeQuestion + "\n\n" + t.examples;
-            document.querySelector('#homework-card button').textContent = t.solve;
-            document.querySelector('#quiz-card .btn-primary').textContent = t.startQuiz;
-            document.getElementById('btn-homework').textContent = t.homeworkBtn;
-            document.getElementById('btn-quiz').textContent = t.quizBtn;
-            document.querySelector('.btn-history').textContent = t.history;
+        // ── helpers ──────────────────────────────────────────────────
+        function roundNice(n, decimals = 10) {
+            const f = Math.pow(10, decimals);
+            return Math.round(n * f) / f;
         }
-
-        function switchMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + mode).classList.add('active');
-            
-            document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
-            document.getElementById(mode + '-card').classList.add('active');
+        function fmtNum(n) {
+            if (!isFinite(n)) return String(n);
+            const r = roundNice(n, 8);
+            // show as fraction if small enough
+            return Number.isInteger(r) ? String(r) : String(r);
         }
-
-        function openModal(type) {
-            const t = translations[currentLang];
-            document.getElementById('modal-title').textContent = type === 'login' ? t.login : t.signup;
-            document.getElementById('auth-btn').textContent = t.continue;
-            document.getElementById('auth-modal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function openHistory() {
-            renderHistory();
-            document.getElementById('history-modal').classList.add('active');
-        }
-
-        function filterHistory(type) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-content');
-            const t = translations[currentLang];
-            
-            let filteredHistory = activityHistory;
-            if (currentFilter !== 'all') {
-                filteredHistory = activityHistory.filter(item => item.type === currentFilter);
-            }
-            
-            // Sort by date descending
-            filteredHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            if (filteredHistory.length === 0) {
-                container.innerHTML = `<div class="empty-history">${t.emptyHistory}</div>`;
-                return;
-            }
-            
-            let html = '';
-            filteredHistory.forEach(item => {
-                const date = new Date(item.date).toLocaleString(currentLang === 'ro' ? 'ro-RO' : 'en-US');
-                const typeClass = item.type;
-                
-                if (item.type === 'homework') {
-                    html += `
-                        <div class="history-item homework">
-                            <div class="history-date">${date}</div>
-                            <div class="history-type">📝 ${currentLang === 'ro' ? 'Temă' : 'Homework'} - ${getSubjectName(item.subject)}</div>
-                            <div class="history-content"><strong>${currentLang === 'ro' ? 'Întrebare' : 'Question'}:</strong> ${item.question.substring(0, 100)}${item.question.length > 100 ? '...' : ''}</div>
-                        </div>
-                    `;
-                } else if (item.type === 'quiz') {
-                    const percentage = Math.round((item.score / item.total) * 100);
-                    html += `
-                        <div class="history-item quiz">
-                            <div class="history-date">${date}</div>
-                            <div class="history-type">🎮 Quiz - ${getSubjectName(item.subject)} (${currentLang === 'ro' ? 'Clasa' : 'Grade'} ${item.grade})</div>
-                            <div class="history-content">
-                                <strong>${t.finalScore}:</strong> ${item.score}/${item.total} (${percentage}%)
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${percentage}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+        function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while(b){[a,b]=[b,a%b];} return a; }
+        function toFraction(decimal, maxDenom = 1000) {
+            if (Number.isInteger(decimal)) return null;
+            for (let d = 2; d <= maxDenom; d++) {
+                const n = Math.round(decimal * d);
+                if (Math.abs(n / d - decimal) < 1e-9) {
+                    const g = gcd(Math.abs(n), d);
+                    return `${n/g}/${d/g}`;
                 }
-            });
-            
-            container.innerHTML = html;
+            }
+            return null;
         }
 
-        function getSubjectName(subject) {
-            const subjects = {
-                ro: {
-                    matematica: 'Matematică',
-                    romana: 'Limba Română',
-                    fizica: 'Fizică',
-                    chimie: 'Chimie',
-                    istorie: 'Istorie',
-                    geografie: 'Geografie',
-                    biologie: 'Biologie',
-                    engleza: 'Engleză'
-                },
-                en: {
-                    matematica: 'Mathematics',
-                    romana: 'Romanian Language',
-                    fizica: 'Physics',
-                    chimie: 'Chemistry',
-                    istorie: 'History',
-                    geografie: 'Geography',
-                    biologie: 'Biology',
-                    engleza: 'English'
+        // ── normalise Romanian natural-language math ─────────────────
+        function normalise(raw) {
+            let s = raw.trim().toLowerCase();
+
+            // Romanian word operators
+            s = s.replace(/\bori\b/g, '*');
+            s = s.replace(/\bînmulțit cu\b/gi, '*');
+            s = s.replace(/\binmultit cu\b/gi, '*');
+            s = s.replace(/\bînmultit cu\b/gi, '*');
+            s = s.replace(/\bîmpărțit la\b/gi, '/');
+            s = s.replace(/\bimpartit la\b/gi, '/');
+            s = s.replace(/\bimpartit cu\b/gi, '/');
+            s = s.replace(/\bîmpărțit cu\b/gi, '/');
+            s = s.replace(/\bplus\b/gi, '+');
+            s = s.replace(/\bminus\b/gi, '-');
+            s = s.replace(/\bla puterea\b/gi, '^');
+            s = s.replace(/\bputerea\b/gi, '^');
+            s = s.replace(/\bpătrat\b/gi, '^2');
+            s = s.replace(/\bcub\b/gi, '^3');
+
+            // percentage: "25% din 80"  →  "25/100*80"
+            s = s.replace(/(\d+(?:\.\d+)?)\s*%\s*din\s*(\d+(?:\.\d+)?)/gi, '($1/100*$2)');
+            s = s.replace(/(\d+(?:\.\d+)?)\s*%\s*of\s*(\d+(?:\.\d+)?)/gi, '($1/100*$2)');
+            // bare "25% din X" already handled; "25%" alone
+            s = s.replace(/(\d+(?:\.\d+)?)\s*%/g, '($1/100)');
+
+            // sqrt / radical
+            s = s.replace(/√\s*(\d+(?:\.\d+)?)/g, 'Math.sqrt($1)');
+            s = s.replace(/sqrt\s*\(([^)]+)\)/gi, 'Math.sqrt($1)');
+            s = s.replace(/radical\s*din\s*(\d+(?:\.\d+)?)/gi, 'Math.sqrt($1)');
+
+            // exponent ^ → **
+            s = s.replace(/\^/g, '**');
+
+            // implicit multiplication: 2x → 2*x, 3(... → 3*(
+            s = s.replace(/(\d)\s*([a-z])/g, '$1*$2');
+            s = s.replace(/([a-z])\s*(\d)/g, '$1*$2');
+            s = s.replace(/(\d)\s*\(/g, '$1*(');
+            s = s.replace(/\)\s*(\d)/g, ')*$1');
+            s = s.replace(/\)\s*\(/g, ')*(');
+
+            return s;
+        }
+
+        // ── safe eval (numbers only, no assignment) ──────────────────
+        function safeEval(expr) {
+            // whitelist characters
+            if (/[^0-9+\-*/().x ^%\sMath\.sqrtpow]/.test(expr)) return null;
+            try {
+                // eslint-disable-next-line no-new-func
+                const result = Function('"use strict"; return (' + expr + ')')();
+                if (typeof result === 'number' && isFinite(result)) return result;
+            } catch(e) {}
+            return null;
+        }
+
+        // ── evaluate a pure numeric expression ───────────────────────
+        function evalExpr(raw) {
+            const norm = normalise(raw);
+            const val = safeEval(norm);
+            if (val === null) return null;
+            return { value: val, normalized: norm };
+        }
+
+        // ── detect equation type and solve ───────────────────────────
+        function solveEquation(raw) {
+            const s = normalise(raw);
+            if (!s.includes('=')) return null;
+            const [lhsRaw, rhsRaw] = s.split('=');
+
+            // ── LINEAR  ax + b = c  (one variable, first degree) ────
+            const linearMatch = /^([+-]?\s*\d*\.?\d*)\s*\*?\s*x\s*([+-]\s*\d+\.?\d*)?\s*$/.test(lhsRaw.trim());
+            if (linearMatch || /x/.test(s)) {
+                const result = solveLinear(lhsRaw, rhsRaw);
+                if (result) return result;
+            }
+            return null;
+        }
+
+        function solveLinear(lhsRaw, rhsRaw) {
+            // Move everything to lhs: lhs - rhs = 0
+            // Parse coefficients of x and constant
+            // We'll use a numeric approach: evaluate lhs at x=0 (constant) and x=1 (a+b)
+            try {
+                const lhs = lhsRaw.trim().replace(/x/g, '*1');
+                const rhs = rhsRaw.trim();
+
+                // Evaluate constant part: substitute x=0
+                const lhsAt0 = Function('"use strict"; let x=0; return (' + lhsRaw.trim() + ')')();
+                const lhsAt1 = Function('"use strict"; let x=1; return (' + lhsRaw.trim() + ')')();
+                const rhsVal = Function('"use strict"; let x=0; return (' + rhs + ')')();
+
+                const coeff = lhsAt1 - lhsAt0; // coefficient of x
+                const constant = lhsAt0;        // constant term on lhs
+
+                if (Math.abs(coeff) < 1e-12) {
+                    // No x — it's either always true or contradiction
+                    if (Math.abs(constant - rhsVal) < 1e-9) return { type:'identity', info: 'Ecuație identitate (infinit de soluții)' };
+                    return { type:'contradiction', info: 'Ecuație fără soluție' };
                 }
-            };
-            return subjects[currentLang][subject] || subject;
+
+                const xVal = (rhsVal - constant) / coeff;
+                return { type:'linear', x: roundNice(xVal, 8), coeff, constant, rhsVal };
+            } catch(e) { return null; }
         }
 
-        function addToHistory(item) {
-            item.date = new Date().toISOString();
-            activityHistory.unshift(item);
-            // Keep only last 50 items
-            if (activityHistory.length > 50) {
-                activityHistory = activityHistory.slice(0, 50);
-            }
-            localStorage.setItem('studybot_history', JSON.stringify(activityHistory));
+        // ── quadratic:  ax² + bx + c = 0 ────────────────────────────
+        function solveQuadratic(raw) {
+            let s = normalise(raw);
+            if (!s.includes('=')) return null;
+
+            let [lhsRaw, rhsRaw] = s.split('=');
+            // move rhs to lhs
+            let expr = `(${lhsRaw}) - (${rhsRaw})`;
+
+            try {
+                // Evaluate at x=0,1,2 to extract a,b,c
+                const f = x => Function('"use strict"; let x=' + x + '; return (' + expr + ')')();
+                const c = f(0);
+                const f1 = f(1);
+                const f2 = f(2);
+                // f(0)=c, f(1)=a+b+c, f(2)=4a+2b+c
+                const b = f1 - c - (f2 - f1 - (f1 - c));
+                const a = f1 - b - c;
+
+                if (Math.abs(a) < 1e-10) return null; // not quadratic
+
+                const disc = b*b - 4*a*c;
+                if (disc < 0) {
+                    // complex roots
+                    const re = -b/(2*a);
+                    const im = Math.sqrt(-disc)/(2*a);
+                    return { type:'quadratic', a, b, c, disc,
+                        roots: [],
+                        complex: [`${fmtNum(roundNice(re,6))} + ${fmtNum(roundNice(Math.abs(im),6))}i`,
+                                  `${fmtNum(roundNice(re,6))} - ${fmtNum(roundNice(Math.abs(im),6))}i`]
+                    };
+                }
+                const x1 = (-b + Math.sqrt(disc)) / (2*a);
+                const x2 = (-b - Math.sqrt(disc)) / (2*a);
+                return { type:'quadratic', a, b, c, disc,
+                    roots: [roundNice(x1,8), roundNice(x2,8)],
+                    complex: null
+                };
+            } catch(e) { return null; }
         }
 
-        function clearHistory() {
-            if (confirm(currentLang === 'ro' ? 'Ești sigur că vrei să ștergi tot istoricul?' : 'Are you sure you want to clear all history?')) {
-                activityHistory = [];
-                localStorage.removeItem('studybot_history');
-                renderHistory();
+        // ── percentage helpers ────────────────────────────────────────
+        function solvePercent(raw) {
+            const s = raw.toLowerCase().trim();
+            // "25% din 80"  /  "cat este X% din Y"
+            const m1 = s.match(/(\d+(?:\.\d+)?)\s*%\s*(?:din|of)\s*(\d+(?:\.\d+)?)/);
+            if (m1) {
+                const p = parseFloat(m1[1]), whole = parseFloat(m1[2]);
+                return { type:'percent_of', p, whole, result: roundNice(p/100*whole, 8) };
             }
+            // "ce procent este X din Y"
+            const m2 = s.match(/(?:ce procent|what percent|cat la suta)[^\d]*(\d+(?:\.\d+)?)[^\d]+(\d+(?:\.\d+)?)/);
+            if (m2) {
+                const part = parseFloat(m2[1]), whole = parseFloat(m2[2]);
+                return { type:'what_percent', part, whole, result: roundNice(part/whole*100, 8) };
+            }
+            return null;
         }
 
-        function authenticate() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                alert(currentLang === 'ro' ? 'Completează toate câmpurile!' : 'Fill in all fields!');
-                return;
+        // ── PUBLIC: solve(question) → HTML string ────────────────────
+        function solve(question) {
+            const q = question.trim();
+
+            // 1. Percentage (before equation check, handles "25% din 80")
+            const pct = solvePercent(q);
+            if (pct) return renderPercent(pct, q);
+
+            // 2. Equation detection: contains '=' and a variable 'x'
+            const hasX = /[xX]/.test(q);
+            const hasEq = /=/.test(q);
+
+            if (hasEq && hasX) {
+                // try quadratic first (detects x² terms)
+                const quad = solveQuadratic(q);
+                if (quad && quad.type === 'quadratic') return renderQuadratic(quad, q);
+                // then linear — only if no squared term present
+                const hasSquared = /x\s*\*\*\s*2|x\s*\^\s*2|x²/i.test(q);
+                if (!hasSquared) {
+                    const lin = solveLinear(
+                        normalise(q).split('=')[0],
+                        normalise(q).split('=')[1]
+                    );
+                    if (lin) return renderLinear(lin, q);
+                }
             }
-            
-            alert(currentLang === 'ro' ? 'Funcție în dezvoltare! În curând vei putea crea cont.' : 'Feature in development! Soon you will be able to create an account.');
-            closeModal('auth-modal');
+
+            // 3. Pure arithmetic expression (no =, no x)
+            if (!hasEq && !hasX) {
+                const ev = evalExpr(q);
+                if (ev !== null) return renderArithmetic(ev, q);
+            }
+
+            // 4. Expression with = but numeric (e.g., "2+2=?")
+            if (hasEq && !hasX) {
+                const lhs = q.split('=')[0];
+                const ev = evalExpr(lhs.replace(/\?/g,''));
+                if (ev !== null) return renderArithmetic(ev, q);
+            }
+
+            return null; // not a math problem we can handle
         }
 
-        // Simulated AI response function - NO API NEEDED
-        async function rezolva() {
-            const materie = document.getElementById('materie').value;
-            const intrebare = document.getElementById('intrebare').value.trim();
-            const raspunsDiv = document.getElementById('raspuns');
-            const t = translations[currentLang];
+        // ── renderers ────────────────────────────────────────────────
 
-            if (!materie) {
-                alert(currentLang === 'ro' ? 'Selectează o materie!' : 'Select a subject!');
-                return;
+        function renderArithmetic(ev, original) {
+            const val = ev.value;
+            const nice = roundNice(val, 8);
+            const frac = Number.isInteger(nice) ? null : toFraction(nice);
+
+            const steps = buildArithmeticSteps(original, ev.normalized, nice);
+
+            let html = `<h3>🔢 Calcul aritmetic</h3>`;
+            html += `<div class="step-box"><div class="step-label">Expresia</div><code>${escHtml(original)}</code></div>`;
+            if (steps.length) {
+                html += `<div class="step-box"><div class="step-label">Pași de calcul</div>`;
+                steps.forEach(s => { html += `<div style="margin:4px 0; padding-left:8px;">▸ ${s}</div>`; });
+                html += `</div>`;
             }
-            if (!intrebare) {
-                alert(currentLang === 'ro' ? 'Scrie o întrebare!' : 'Write a question!');
-                return;
+            html += `<div class="result-box">Rezultat: ${fmtNum(nice)}`;
+            if (frac) html += ` &nbsp;=&nbsp; <span style="font-size:15px;font-weight:normal;">${frac}</span>`;
+            html += `</div>`;
+
+            return html;
+        }
+
+        function buildArithmeticSteps(original, normalised, result) {
+            const steps = [];
+            const norm = original.toLowerCase();
+
+            // Romanian natural language hints
+            if (/\bori\b/.test(norm)) steps.push(`"ori" → operația de înmulțire (×)`);
+            if (/\bînmulțit cu\b|\binmultit cu\b/i.test(norm)) steps.push(`"înmulțit cu" → operația de înmulțire (×)`);
+            if (/\bîmpărțit\b|\bimpartit\b/i.test(norm)) steps.push(`"împărțit la/cu" → operația de împărțire (÷)`);
+            if (/√|sqrt|radical/i.test(norm)) steps.push(`Radical → se aplică funcția √`);
+
+            // detect sub-expressions
+            const clean = normalised.replace(/Math\.sqrt/g,'√').replace(/\*\*/g,'^');
+            steps.push(`Expresia normalizată: ${clean}`);
+            steps.push(`Rezultat numeric: ${fmtNum(result)}`);
+            return steps;
+        }
+
+        function renderLinear(lin, original) {
+            if (!lin) return null;
+            const { type, x, coeff, constant, rhsVal } = lin;
+            if (type === 'identity') return `<div class="result-box">⚠️ Ecuație identitate — infinit de soluții</div>`;
+            if (type === 'contradiction') return `<div class="result-box">⚠️ Ecuație fără soluție</div>`;
+
+            const xFrac = toFraction(x);
+            const display = Number.isInteger(roundNice(x,5)) ? fmtNum(Math.round(x)) : fmtNum(x);
+
+            let html = `<h3>📐 Ecuație de gradul I</h3>`;
+            html += `<div class="step-box"><div class="step-label">Ecuația</div><code>${escHtml(original)}</code></div>`;
+            html += `<div class="step-box"><div class="step-label">Identificăm coeficienții</div>`;
+            html += `Coeficientul lui x: <strong>${fmtNum(coeff)}</strong><br>`;
+            html += `Termenul liber (stânga): <strong>${fmtNum(constant)}</strong><br>`;
+            html += `Termenul din dreapta: <strong>${fmtNum(rhsVal)}</strong></div>`;
+            html += `<div class="step-box"><div class="step-label">Rezolvare</div>`;
+            html += `${fmtNum(coeff)} · x = ${fmtNum(rhsVal)} − ${fmtNum(constant)}<br>`;
+            html += `${fmtNum(coeff)} · x = ${fmtNum(rhsVal - constant)}<br>`;
+            html += `x = ${fmtNum(rhsVal - constant)} ÷ ${fmtNum(coeff)}</div>`;
+            html += `<div class="result-box">x = ${display}`;
+            if (xFrac && !Number.isInteger(roundNice(x,5))) html += ` &nbsp;=&nbsp; ${xFrac}`;
+            html += `</div>`;
+
+            // Verification
+            const verif = roundNice(coeff * x + constant, 6);
+            const rhsV  = roundNice(rhsVal, 6);
+            const ok = Math.abs(verif - rhsV) < 1e-5;
+            html += `<div class="verify-box">✅ Verificare: înlocuim x = ${display} → obținem ${fmtNum(roundNice(coeff*x+constant,4))} = ${fmtNum(roundNice(rhsVal,4))} ${ok?'✔️ Corect!':'⚠️ Verificați datele'}</div>`;
+
+            return html;
+        }
+
+        function renderQuadratic(q, original) {
+            const { a, b, c, disc, roots, complex } = q;
+            let html = `<h3>📐 Ecuație de gradul al II-lea</h3>`;
+            html += `<div class="step-box"><div class="step-label">Ecuația</div><code>${escHtml(original)}</code></div>`;
+            html += `<div class="step-box"><div class="step-label">Forma standard: ax² + bx + c = 0</div>`;
+            html += `a = ${fmtNum(roundNice(a,4))}, b = ${fmtNum(roundNice(b,4))}, c = ${fmtNum(roundNice(c,4))}</div>`;
+            html += `<div class="step-box"><div class="step-label">Discriminantul</div>`;
+            html += `Δ = b² − 4ac = ${fmtNum(roundNice(b*b,4))} − ${fmtNum(roundNice(4*a*c,4))} = <strong>${fmtNum(roundNice(disc,4))}</strong></div>`;
+
+            if (complex) {
+                html += `<div class="result-box">Δ < 0 → soluții complexe (imaginare)<br>x₁ = ${complex[0]}<br>x₂ = ${complex[1]}</div>`;
+            } else if (roots.length === 2 && Math.abs(roots[0]-roots[1]) < 1e-9) {
+                html += `<div class="step-box"><div class="step-label">Rezolvare</div>Δ = 0 → soluție dublă<br>`;
+                html += `x₁ = x₂ = −b / (2a) = ${fmtNum(roots[0])}</div>`;
+                html += `<div class="result-box">x₁ = x₂ = ${fmtNum(roots[0])}</div>`;
+            } else {
+                html += `<div class="step-box"><div class="step-label">Rezolvare</div>Δ > 0 → două soluții reale distincte<br>`;
+                html += `x₁ = (−b + √Δ) / (2a) = ${fmtNum(roots[0])}<br>`;
+                html += `x₂ = (−b − √Δ) / (2a) = ${fmtNum(roots[1])}</div>`;
+                html += `<div class="result-box">x₁ = ${fmtNum(roots[0])}&nbsp;&nbsp;|&nbsp;&nbsp;x₂ = ${fmtNum(roots[1])}</div>`;
+                // verification
+                const v1 = roundNice(a*roots[0]**2 + b*roots[0] + c, 5);
+                const v2 = roundNice(a*roots[1]**2 + b*roots[1] + c, 5);
+                html += `<div class="verify-box">✅ Verificare: f(x₁)=${fmtNum(v1)} ≈ 0 ${Math.abs(v1)<0.001?'✔️':'⚠️'} &nbsp;|&nbsp; f(x₂)=${fmtNum(v2)} ≈ 0 ${Math.abs(v2)<0.001?'✔️':'⚠️'}</div>`;
             }
+            return html;
+        }
 
-            raspunsDiv.style.display = 'block';
-            raspunsDiv.innerHTML = '<p class="loading">' + t.thinking + '</p>';
+        function renderPercent(p, original) {
+            let html = `<h3>📊 Calcul procente</h3>`;
+            html += `<div class="step-box"><div class="step-label">Expresia</div><code>${escHtml(original)}</code></div>`;
+            if (p.type === 'percent_of') {
+                html += `<div class="step-box"><div class="step-label">Pași</div>`;
+                html += `${p.p}% din ${p.whole}<br>= ${p.p}/100 × ${p.whole}<br>= ${fmtNum(p.p/100)} × ${p.whole}</div>`;
+                html += `<div class="result-box">Rezultat: ${fmtNum(p.result)}</div>`;
+            } else {
+                html += `<div class="step-box"><div class="step-label">Pași</div>`;
+                html += `(${p.part} ÷ ${p.whole}) × 100</div>`;
+                html += `<div class="result-box">Rezultat: ${fmtNum(p.result)}%</div>`;
+            }
+            return html;
+        }
 
-            // Simulate thinking time (1-2 seconds)
-            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+        function escHtml(s) {
+            return s.replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+        }
 
-            // Get response template for the subject
-            const responseTemplate = simulatedResponses[currentLang][materie] || simulatedResponses[currentLang]['matematica'];
-            
-            // Personalize response based on question keywords
-            const questionPreview = intrebare.length > 50 ? intrebare.substring(0, 50) + '...' : intrebare;
-            
-            const header = currentLang === 'ro' 
-                ? `<h3>📝 Analiza problemei: "${questionPreview}"</h3>`
-                : `<h3>📝 Problem analysis: "${questionPreview}"</h3>`;
-            
+        return { solve };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Language / UI
+    // ═══════════════════════════════════════════════════════════════════
+
+    const translations = {
+        ro: {
+            homework: "🎓 Rezolvător de Teme - StudyBot 3000",
+            quiz: "🎮 Quiz Interactiv",
+            selectSubject: "Selectează materia...",
+            selectClass: "Selectează clasa...",
+            writeQuestion: "Scrie aici problema sau întrebarea ta...",
+            solve: "🔍 Rezolvă",
+            startQuiz: "▶️ Începe Quiz-ul",
+            login: "🔐 Log In",
+            signup: "✨ Create Account",
+            continue: "Continuă",
+            thinking: "⏳ Se calculează... Așteaptă câteva secunde...",
+            answer: "✅ Răspuns:",
+            homeworkBtn: "📝 Rezolvă Teme",
+            quizBtn: "🎮 Quiz Interactiv",
+            history: "📚 Istoric",
+            question: "Întrebarea",
+            finalScore: "Scor final",
+            congratulations: "Felicitări! Ai completat quiz-ul cu scorul de",
+            correct: "Corect",
+            wrong: "Greșit",
+            all: "Toate",
+            homeworkFilter: "Teme",
+            quizFilter: "Quiz-uri",
+            emptyHistory: "Nu există activități în istoric",
+            clearHistory: "🗑️ Șterge Istoricul"
+        },
+        en: {
+            homework: "🎓 Homework Solver - StudyBot 3000",
+            quiz: "🎮 Interactive Quiz",
+            selectSubject: "Select subject...",
+            selectClass: "Select grade...",
+            writeQuestion: "Write your problem or question here...",
+            solve: "🔍 Solve",
+            startQuiz: "▶️ Start Quiz",
+            login: "🔐 Log In",
+            signup: "✨ Create Account",
+            continue: "Continue",
+            thinking: "⏳ Thinking... Please wait a few seconds...",
+            answer: "✅ Answer:",
+            homeworkBtn: "📝 Solve Homework",
+            quizBtn: "🎮 Interactive Quiz",
+            history: "📚 History",
+            question: "Question",
+            finalScore: "Final Score",
+            congratulations: "Congratulations! You completed the quiz with a score of",
+            correct: "Correct",
+            wrong: "Wrong",
+            all: "All",
+            homeworkFilter: "Homework",
+            quizFilter: "Quizzes",
+            emptyHistory: "No activities in history",
+            clearHistory: "🗑️ Clear History"
+        }
+    };
+
+    // ── Static fallback responses for non-math subjects ──────────────
+    const simulatedResponses = {
+        ro: {
+            romana: "Analiza textului:<br><br><strong>Tema:</strong> Dragostea, natura, viața satului, relațiile umane<br><br><strong>Figuri de stil identificate:</strong><br>• <strong>Epitet:</strong> 'zâmbet blând', 'soare cald'<br>• <strong>Comparație:</strong> 'ca', 'precum', 'ca și'<br>• <strong>Metaforă:</strong> 'ochii stele', 'inima de piatră'<br>• <strong>Personificare:</strong> natura înveselește, vântul cântă<br><br><strong>Mesajul:</strong> Autorul transmite emoții pozitive/negative prin descrierea naturii și a personajelor.",
+            fizica: "Rezolvare problemă fizică:<br><br><strong>Formule necesare:</strong><br>- F = m × a (a doua lege a lui Newton)<br>- v = d / t (viteza)<br>- E = m × g × h (energia potențială)<br><br><strong>Rezolvare:</strong><br>1. Transformăm unitățile în SI<br>2. Înlocuim în formulă<br>3. Calculăm numeric<br>4. Verificăm unitatea de măsură",
+            chimie: "Rezolvare problemă chimică:<br><br><strong>Pași de calcul:</strong><br>1. Calculăm masele moleculare<br>2. Stabilim raportul molar<br>3. Aplicăm regula de trei simplă<br>4. Determinăm cantitatea cerută",
+            istorie: "Analiza evenimentului istoric:<br><br><strong>Context:</strong> Perioada, locația, situația politică/socială anterioară<br><br><strong>Cauze:</strong><br>• Cauze imediate (declanșatoare)<br>• Cauze profunde (structurale)<br><br><strong>Consecințe:</strong> Pe termen scurt și lung",
+            geografie: "Descriere geografică:<br><br><strong>Localizare, Relief, Climă, Hidrografie, Vegetație, Populație</strong><br><br>Detaliați întrebarea pentru un răspuns mai precis.",
+            biologie: "Descriere sistem biologic:<br><br><strong>Structură → Funcții → Importanță</strong><br><br>Detaliați întrebarea pentru un răspuns mai precis.",
+            engleza: "Explicație gramaticală:<br><br><strong>Regulă → Structură → Exemple → Excepții</strong><br><br>Detaliați întrebarea pentru un răspuns mai precis."
+        },
+        en: {
+            romana: "Text analysis:<br><br><strong>Theme:</strong> Love, nature, village life<br><br><strong>Literary devices:</strong> Epithet, Simile, Metaphor, Personification<br><br>Detail your question for a more precise answer.",
+            fizica: "Physics solution:<br><br><strong>Key formulas:</strong> F=ma, v=d/t, E=mgh<br><br>Detail your question for a more precise answer.",
+            chimie: "Chemistry solution:<br><br><strong>Steps:</strong> Molecular masses → Molar ratio → Proportion → Result<br><br>Detail your question for a more precise answer.",
+            istorie: "Historical analysis:<br><br><strong>Context → Causes → Events → Consequences</strong><br><br>Detail your question for a more precise answer.",
+            geografie: "Geographic description:<br><br><strong>Location, Relief, Climate, Hydrography</strong><br><br>Detail your question for a more precise answer.",
+            biologie: "Biological system:<br><br><strong>Structure → Functions → Importance</strong><br><br>Detail your question for a more precise answer.",
+            engleza: "Grammar explanation:<br><br><strong>Rule → Structure → Examples → Exceptions</strong><br><br>Detail your question for a more precise answer."
+        }
+    };
+
+    let currentLang = 'ro';
+    let currentMode = 'homework';
+    let currentQuestion = 0;
+    let quizScore = 0;
+    let quizQuestions = [];
+    let currentFilter = 'all';
+    let activityHistory = JSON.parse(localStorage.getItem('studybot_history')) || [];
+
+    function changeLanguage() {
+        currentLang = document.getElementById('langSelect').value;
+        const t = translations[currentLang];
+        document.getElementById('homework-title').textContent = t.homework;
+        document.getElementById('quiz-title').textContent    = t.quiz;
+        document.querySelector('.btn-history').textContent   = t.history;
+        document.getElementById('btn-homework').textContent  = t.homeworkBtn;
+        document.getElementById('btn-quiz').textContent      = t.quizBtn;
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + mode).classList.add('active');
+        document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
+        document.getElementById(mode + '-card').classList.add('active');
+    }
+
+    function openModal(type) {
+        const t = translations[currentLang];
+        document.getElementById('modal-title').textContent = type === 'login' ? t.login : t.signup;
+        document.getElementById('auth-btn').textContent = t.continue;
+        document.getElementById('auth-modal').classList.add('active');
+    }
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    function openHistory() { renderHistory(); document.getElementById('history-modal').classList.add('active'); }
+
+    function filterHistory(type) {
+        currentFilter = type;
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('history-content');
+        const t = translations[currentLang];
+        let filteredHistory = currentFilter === 'all' ? activityHistory : activityHistory.filter(i => i.type === currentFilter);
+        filteredHistory.sort((a,b) => new Date(b.date) - new Date(a.date));
+        if (!filteredHistory.length) { container.innerHTML = `<div class="empty-history">${t.emptyHistory}</div>`; return; }
+        let html = '';
+        filteredHistory.forEach(item => {
+            const date = new Date(item.date).toLocaleString(currentLang === 'ro' ? 'ro-RO' : 'en-US');
+            if (item.type === 'homework') {
+                html += `<div class="history-item homework"><div class="history-date">${date}</div><div class="history-type">📝 ${currentLang==='ro'?'Temă':'Homework'} - ${getSubjectName(item.subject)}</div><div class="history-content"><strong>${currentLang==='ro'?'Întrebare':'Question'}:</strong> ${item.question.substring(0,100)}${item.question.length>100?'...':''}</div></div>`;
+            } else {
+                const pct = Math.round((item.score/item.total)*100);
+                html += `<div class="history-item quiz"><div class="history-date">${date}</div><div class="history-type">🎮 Quiz - ${getSubjectName(item.subject)} (${currentLang==='ro'?'Clasa':'Grade'} ${item.grade})</div><div class="history-content"><strong>${t.finalScore}:</strong> ${item.score}/${item.total} (${pct}%)<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div></div>`;
+            }
+        });
+        container.innerHTML = html;
+    }
+
+    function getSubjectName(subject) {
+        const s = { ro:{matematica:'Matematică',romana:'Limba Română',fizica:'Fizică',chimie:'Chimie',istorie:'Istorie',geografie:'Geografie',biologie:'Biologie',engleza:'Engleză'},
+                    en:{matematica:'Mathematics',romana:'Romanian',fizica:'Physics',chimie:'Chemistry',istorie:'History',geografie:'Geography',biologie:'Biology',engleza:'English'} };
+        return (s[currentLang]||s.ro)[subject] || subject;
+    }
+
+    function addToHistory(item) {
+        item.date = new Date().toISOString();
+        activityHistory.unshift(item);
+        if (activityHistory.length > 50) activityHistory = activityHistory.slice(0,50);
+        localStorage.setItem('studybot_history', JSON.stringify(activityHistory));
+    }
+
+    function clearHistory() {
+        if (confirm(currentLang==='ro'?'Ești sigur că vrei să ștergi tot istoricul?':'Are you sure you want to clear all history?')) {
+            activityHistory = [];
+            localStorage.removeItem('studybot_history');
+            renderHistory();
+        }
+    }
+
+    function authenticate() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        if (!email || !password) { alert(currentLang==='ro'?'Completează toate câmpurile!':'Fill in all fields!'); return; }
+        alert(currentLang==='ro'?'Funcție în dezvoltare! În curând vei putea crea cont.':'Feature in development! Soon you will be able to create an account.');
+        closeModal('auth-modal');
+    }
+
+    // ── Main solve function ──────────────────────────────────────────
+    async function rezolva() {
+        const materie   = document.getElementById('materie').value;
+        const intrebare = document.getElementById('intrebare').value.trim();
+        const raspunsDiv = document.getElementById('raspuns');
+        const t = translations[currentLang];
+
+        if (!materie)    { alert(currentLang==='ro'?'Selectează o materie!':'Select a subject!'); return; }
+        if (!intrebare)  { alert(currentLang==='ro'?'Scrie o întrebare!':'Write a question!'); return; }
+
+        raspunsDiv.style.display = 'block';
+        raspunsDiv.innerHTML = '<p class="loading">' + t.thinking + '</p>';
+
+        // small artificial delay for UX
+        await new Promise(r => setTimeout(r, 400 + Math.random() * 400));
+
+        let bodyHtml = '';
+
+        if (materie === 'matematica') {
+            // ── TRY REAL MATH ENGINE ─────────────────────────────────
+            const mathResult = MathEngine.solve(intrebare);
+
+            if (mathResult) {
+                const qPrev = intrebare.length > 60 ? intrebare.substring(0,60)+'…' : intrebare;
+                bodyHtml = `<div class="answer-content">${mathResult}</div>`;
+            } else {
+                // Could not parse as a calculable expression → give guidance
+                const qPrev = intrebare.length > 60 ? intrebare.substring(0,60)+'…' : intrebare;
+                const fallback = currentLang === 'ro'
+                    ? `<div class="answer-content">
+                        <h3>📝 Problemă matematică: "${qPrev}"</h3>
+                        <div class="step-box">
+                            <div class="step-label">Analiză</div>
+                            Problema ta conține text descriptiv sau date nestructurate. Pentru calcul automat încearcă să scrii direct:
+                        </div>
+                        <div class="math-hint">
+                            💡 <strong>Exemple pe care le pot calcula direct:</strong><br>
+                            • Aritmetică: <code>8 * 7</code> sau <code>8 ori 7</code><br>
+                            • Ec. liniare: <code>2x + 5 = 15</code><br>
+                            • Ec. grad II: <code>x^2 - 5x + 6 = 0</code><br>
+                            • Procente: <code>25% din 80</code><br>
+                            • Radical: <code>√144</code> sau <code>radical din 144</code><br>
+                            • Expresii: <code>(3 + 4) * 2 - 1</code>
+                        </div>
+                        <div class="step-box">
+                            <div class="step-label">Abordare generală</div>
+                            1. Identifică datele problemei (cunoscute)<br>
+                            2. Stabilește ce trebuie aflat (necunoscuta)<br>
+                            3. Alege formula potrivită<br>
+                            4. Înlocuiește și calculează<br>
+                            5. Verifică rezultatul și unitatea de măsură
+                        </div>
+                       </div>`
+                    : `<div class="answer-content">
+                        <h3>📝 Math problem: "${qPrev}"</h3>
+                        <div class="math-hint">
+                            💡 <strong>Examples I can calculate directly:</strong><br>
+                            • Arithmetic: <code>8 * 7</code> or <code>8 times 7</code><br>
+                            • Linear eq: <code>2x + 5 = 15</code><br>
+                            • Quadratic: <code>x^2 - 5x + 6 = 0</code><br>
+                            • Percentages: <code>25% of 80</code><br>
+                            • Square root: <code>√144</code><br>
+                            • Expressions: <code>(3 + 4) * 2 - 1</code>
+                        </div>
+                        <div class="step-box">
+                            <div class="step-label">General approach</div>
+                            1. Identify known data<br>
+                            2. Define the unknown<br>
+                            3. Choose the right formula<br>
+                            4. Substitute and calculate<br>
+                            5. Check the result and units
+                        </div>
+                       </div>`;
+                bodyHtml = fallback;
+            }
+        } else {
+            // ── Other subjects: use static templates ─────────────────
+            const tmpl = (simulatedResponses[currentLang] || simulatedResponses.ro)[materie]
+                      || (simulatedResponses.ro)[materie]
+                      || 'Răspuns indisponibil pentru această materie.';
+            const qPrev = intrebare.length > 50 ? intrebare.substring(0,50)+'…' : intrebare;
+            const header = currentLang === 'ro'
+                ? `<h3>📝 Analiza problemei: "${qPrev}"</h3>`
+                : `<h3>📝 Problem analysis: "${qPrev}"</h3>`;
             const footer = currentLang === 'ro'
-                ? `<br><br><em>💡 Sfat: Pentru rezultate mai precise, detaliați problema cu date concrete (numere, dimensiuni, condiții specifice).</em>`
-                : `<br><br><em>💡 Tip: For more precise results, detail the problem with concrete data (numbers, dimensions, specific conditions).</em>`;
-
-            const formatat = '<div class="answer-content">' + header + responseTemplate + footer + '</div>';
-            
-            raspunsDiv.innerHTML = formatat;
-
-            // Save to history
-            addToHistory({
-                type: 'homework',
-                subject: materie,
-                question: intrebare,
-                answer: responseTemplate
-            });
+                ? `<br><em>💡 Sfat: Detaliați problema cu date concrete pentru rezultate mai precise.</em>`
+                : `<br><em>💡 Tip: Provide concrete data for more precise results.</em>`;
+            bodyHtml = `<div class="answer-content">${header}${tmpl}${footer}</div>`;
         }
 
-        async function startQuiz() {
-            const materie = document.getElementById('quiz-materie').value;
-            const clasa = document.getElementById('quiz-clasa').value;
-            const container = document.getElementById('quiz-container');
-            const scoreDiv = document.getElementById('quiz-score');
-            
-            if (!materie || !clasa) {
-                alert(currentLang === 'ro' ? 'Selectează materia și clasa!' : 'Select subject and grade!');
-                return;
-            }
-            
-            container.style.display = 'block';
-            scoreDiv.style.display = 'none';
-            container.innerHTML = '<p class="loading">' + (currentLang === 'ro' ? '⏳ Se generează întrebările...' : '⏳ Generating questions...') + '</p>';
-            
-            quizQuestions = generateSampleQuestions(materie, clasa);
-            currentQuestion = 0;
-            quizScore = 0;
-            
-            setTimeout(() => {
-                showQuestion();
-            }, 1000);
-        }
+        raspunsDiv.innerHTML = bodyHtml;
 
-        function generateSampleQuestions(materie, clasa) {
-            const questions = {
-                matematica: [
-                    { question: currentLang === 'ro' ? 'Care este rezultatul lui 2x + 5 = 15?' : 'What is the result of 2x + 5 = 15?', options: currentLang === 'ro' ? ['x = 5', 'x = 10', 'x = 7.5', 'x = 20'] : ['x = 5', 'x = 10', 'x = 7.5', 'x = 20'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Cât este 25% din 80?' : 'What is 25% of 80?', options: ['15', '20', '25', '30'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este formula ariei unui cerc?' : 'What is the formula for the area of a circle?', options: currentLang === 'ro' ? ['πr²', '2πr', 'πd', 'r²'] : ['πr²', '2πr', 'πd', 'r²'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Cât este 3² + 4²?' : 'What is 3² + 4²?', options: ['16', '25', '49', '12'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mic multiplu comun al numerelor 4 și 6?' : 'What is the least common multiple of 4 and 6?', options: ['12', '24', '2', '18'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Cât este √144?' : 'What is √144?', options: ['10', '11', '12', '14'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Dacă un triunghi are unghiurile de 60°, 60° și 60°, ce tip de triunghi este?' : 'If a triangle has angles of 60°, 60°, and 60°, what type of triangle is it?', options: currentLang === 'ro' ? ['Isoscel', 'Echilateral', 'Dreptunghic', 'Obtuzunghic'] : ['Isosceles', 'Equilateral', 'Right', 'Obtuse'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cât este 0,75 ca fracție?' : 'What is 0.75 as a fraction?', options: ['1/2', '2/3', '3/4', '4/5'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Care este perimetrul unui pătrat cu latura de 5 cm?' : 'What is the perimeter of a square with side 5 cm?', options: ['10 cm', '15 cm', '20 cm', '25 cm'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Cât este 2³ × 2²?' : 'What is 2³ × 2²?', options: ['16', '32', '64', '128'], correct: 1 }
-                ],
-                romana: [
-                    { question: currentLang === 'ro' ? 'Cine a scris "Povestea lui Harap-Alb"?' : 'Who wrote "The Story of Harap-Alb"?', options: currentLang === 'ro' ? ['Mihai Eminescu', 'Ion Creangă', 'Ion Luca Caragiale', 'Mihail Sadoveanu'] : ['Mihai Eminescu', 'Ion Creangă', 'Ion Luca Caragiale', 'Mihail Sadoveanu'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este o metaforă?' : 'What is a metaphor?', options: currentLang === 'ro' ? ['O comparație fără cuvinte de legătură', 'O repetiție de cuvinte', 'O enumerare', 'O întrebare retorică'] : ['A comparison without connecting words', 'A repetition of words', 'An enumeration', 'A rhetorical question'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Cine este autorul poeziei "Luceafărul"?' : 'Who is the author of the poem "Luceafărul"?', options: ['George Coșbuc', 'Mihai Eminescu', 'Ion Minulescu', 'Tudor Arghezi'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce parte de vorbire este cuvântul "frumos"?' : 'What part of speech is the word "beautiful"?', options: currentLang === 'ro' ? ['Substantiv', 'Adjectiv', 'Verb', 'Adverb'] : ['Noun', 'Adjective', 'Verb', 'Adverb'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este sinonimul cuvântului "a începe"?' : 'What is the synonym of "to begin"?', options: currentLang === 'ro' ? ['A termina', 'A porni', 'A opri', 'A sfârși'] : ['To finish', 'To start', 'To stop', 'To end'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'În ce secol a trăit Mihai Eminescu?' : 'In which century did Mihai Eminescu live?', options: ['XVII', 'XVIII', 'XIX', 'XX'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce este un epitet?' : 'What is an epithet?', options: currentLang === 'ro' ? ['O comparație', 'Un adjectiv care determină un substantiv', 'O repetiție', 'O enumerare'] : ['A comparison', 'An adjective determining a noun', 'A repetition', 'An enumeration'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cine a scris "O scrisoare pierdută"?' : 'Who wrote "A Lost Letter"?', options: ['Ion Creangă', 'Ion Luca Caragiale', 'Mihail Sadoveanu', 'Liviu Rebreanu'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este o antiteză?' : 'What is an antithesis?', options: currentLang === 'ro' ? ['Apropierea unor cuvinte cu sens opus', 'Repetarea unui cuvânt', 'O enumerare', 'O comparație'] : ['Juxtaposition of contrasting words', 'Repetition of a word', 'An enumeration', 'A comparison'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Care este pluralul corect al cuvântului "copil"?' : 'What is the correct plural of "child"?', options: currentLang === 'ro' ? ['Copili', 'Copii', 'Copiii', 'Copilăi'] : ['Children', 'Childs', 'Childes', 'Childrens'], correct: 1 }
-                ],
-                fizica: [
-                    { question: currentLang === 'ro' ? 'Care este unitatea de măsură pentru forță?' : 'What is the unit of measurement for force?', options: currentLang === 'ro' ? ['Watt', 'Newton', 'Joule', 'Pascal'] : ['Watt', 'Newton', 'Joule', 'Pascal'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cât este viteza luminii în vid?' : 'What is the speed of light in vacuum?', options: currentLang === 'ro' ? ['300.000 km/s', '150.000 km/s', '500.000 km/s', '1.000.000 km/s'] : ['300,000 km/s', '150,000 km/s', '500,000 km/s', '1,000,000 km/s'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Care este legea lui Ohm?' : 'What is Ohm\'s Law?', options: ['U = I × R', 'F = m × a', 'E = m × c²', 'P = U × I'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Ce unitate de măsură are energia?' : 'What unit is energy measured in?', options: ['Newton', 'Watt', 'Joule', 'Pascal'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Câte stări ale materiei există în mod obișnuit?' : 'How many states of matter commonly exist?', options: ['2', '3', '4', '5'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce este densitatea?' : 'What is density?', options: currentLang === 'ro' ? ['Masă × Volum', 'Masă / Volum', 'Volum / Masă', 'Masă + Volum'] : ['Mass × Volume', 'Mass / Volume', 'Volume / Mass', 'Mass + Volume'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'La ce temperatură apa fierbe la presiune normală?' : 'At what temperature does water boil at normal pressure?', options: ['90°C', '100°C', '110°C', '120°C'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este formula pentru viteză?' : 'What is the formula for speed?', options: ['t/d', 'd/t', 'd×t', 'd-t'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este curentul electric?' : 'What is electric current?', options: currentLang === 'ro' ? ['Mișcare de electroni', 'Mișcare de protoni', 'Mișcare de neutroni', 'Căldură'] : ['Electron movement', 'Proton movement', 'Neutron movement', 'Heat'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Câte culori are spectrul vizibil?' : 'How many colors does the visible spectrum have?', options: ['5', '6', '7', '8'], correct: 2 }
-                ],
-                chimie: [
-                    { question: currentLang === 'ro' ? 'Care este simbolul chimic pentru aur?' : 'What is the chemical symbol for gold?', options: ['Ag', 'Au', 'Fe', 'Cu'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este pH-ul apei pure?' : 'What is the pH of pure water?', options: ['0', '7', '14', '1'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este formula chimică a apei?' : 'What is the chemical formula of water?', options: ['CO₂', 'H₂O', 'NaCl', 'O₂'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce element are numărul atomic 1?' : 'Which element has atomic number 1?', options: ['Heliu', 'Hidrogen', 'Litiu', 'Carbon'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este un acid?' : 'What is an acid?', options: currentLang === 'ro' ? ['O substanță cu pH > 7', 'O substanță cu pH < 7', 'O substanță cu pH = 7', 'Un metal'] : ['A substance with pH > 7', 'A substance with pH < 7', 'A substance with pH = 7', 'A metal'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este gazul cel mai abundent în atmosferă?' : 'What is the most abundant gas in the atmosphere?', options: ['Oxigen', 'Azot', 'Dioxid de carbon', 'Hidrogen'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este o reacție de oxidare?' : 'What is an oxidation reaction?', options: currentLang === 'ro' ? ['Pierdere de electroni', 'Câștig de electroni', 'Reacție cu apă', 'Reacție cu oxigen'] : ['Loss of electrons', 'Gain of electrons', 'Reaction with water', 'Reaction with oxygen'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Care este formula chimică a sării de bucătărie?' : 'What is the chemical formula of table salt?', options: ['HCl', 'NaOH', 'NaCl', 'KCl'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Câte elemente are tabelul periodic?' : 'How many elements are in the periodic table?', options: ['92', '108', '118', '156'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce este un izotop?' : 'What is an isotope?', options: currentLang === 'ro' ? ['Atom cu același număr de protoni dar număr diferit de neutroni', 'Atom cu același număr de neutroni', 'Ion pozitiv', 'Ion negativ'] : ['Atom with same number of protons but different neutrons', 'Atom with same number of neutrons', 'Positive ion', 'Negative ion'], correct: 0 }
-                ],
-                istorie: [
-                    { question: currentLang === 'ro' ? 'În ce an a avut loc Unirea Principatelor Române?' : 'In what year did the Union of the Romanian Principalities take place?', options: ['1848', '1859', '1877', '1918'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cine a fost primul domnitor al României unite?' : 'Who was the first ruler of united Romania?', options: ['Carol I', 'Alexandru Ioan Cuza', 'Ferdinand I', 'Mihai Viteazul'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'În ce an a început Primul Război Mondial?' : 'In what year did World War I begin?', options: ['1912', '1914', '1916', '1918'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cine a construit Columna lui Traian?' : 'Who built Trajan\'s Column?', options: ['Traian', 'Decebal', 'Hadrian', 'Constantin'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'În ce an a avut loc Marea Unire?' : 'In what year did the Great Union take place?', options: ['1916', '1917', '1918', '1919'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Cine a fost conducătorul statului dac în războaiele cu romanii?' : 'Who was the leader of the Dacian state in the wars with the Romans?', options: ['Burebista', 'Decebal', 'Comosicus', 'Duras'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'În ce an a avut loc Revoluția Franceză?' : 'In what year did the French Revolution take place?', options: ['1776', '1789', '1799', '1804'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cine a descoperit America?' : 'Who discovered America?', options: ['Vasco da Gama', 'Cristofor Columb', 'Fernando Magellan', 'Marco Polo'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'În ce an a căzut Imperiul Roman de Apus?' : 'In what year did the Western Roman Empire fall?', options: ['376', '410', '476', '500'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Cine a fost primul împărat al Romei?' : 'Who was the first emperor of Rome?', options: ['Iulius Cezar', 'Augustus', 'Nero', 'Traian'], correct: 1 }
-                ],
-                geografie: [
-                    { question: currentLang === 'ro' ? 'Care este cel mai înalt vârf montan din lume?' : 'What is the highest mountain peak in the world?', options: ['K2', 'Kilimanjaro', 'Everest', 'Matterhorn'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai lung fluviu din lume?' : 'What is the longest river in the world?', options: ['Nil', 'Amazon', 'Mississippi', 'Yangtze'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mare ocean?' : 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], correct: 3 },
-                    { question: currentLang === 'ro' ? 'Care este capitala Franței?' : 'What is the capital of France?', options: ['Londra', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Câte continente există?' : 'How many continents are there?', options: ['5', '6', '7', '8'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mare deșert din lume?' : 'What is the largest desert in the world?', options: ['Sahara', 'Gobi', 'Antarctica', 'Kalahari'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'În ce țară se află Muntele Fuji?' : 'In which country is Mount Fuji located?', options: ['China', 'Coreea de Sud', 'Japonia', 'Thailanda'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mare lac din lume ca suprafață?' : 'What is the largest lake in the world by surface area?', options: ['Lacul Baikal', 'Lacul Superior', 'Marea Caspică', 'Lacul Victoria'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Prin câte țări trece Dunărea?' : 'Through how many countries does the Danube flow?', options: ['8', '9', '10', '12'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mic stat din lume ca suprafață?' : 'What is the smallest country in the world by area?', options: ['Monaco', 'San Marino', 'Vatican', 'Liechtenstein'], correct: 2 }
-                ],
-                biologie: [
-                    { question: currentLang === 'ro' ? 'Care este unitatea de bază a vieții?' : 'What is the basic unit of life?', options: ['Țesut', 'Organ', 'Celulă', 'Molecule'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce organelle produce energie în celulă?' : 'Which organelle produces energy in the cell?', options: ['Nucleu', 'Ribozom', 'Mitocondrie', 'Lizozom'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Câte perechi de cromozomi au oamenii?' : 'How many pairs of chromosomes do humans have?', options: ['22', '23', '24', '46'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este fotosinteza?' : 'What is photosynthesis?', options: currentLang === 'ro' ? ['Proces de producere a energiei', 'Proces de conversie a luminii în energie chimică', 'Proces de respirație', 'Proces de digestie'] : ['Energy production process', 'Process of converting light into chemical energy', 'Respiration process', 'Digestion process'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este cel mai mare organ al corpului uman?' : 'What is the largest organ of the human body?', options: ['Ficat', 'Creier', 'Piele', 'Inimă'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce tip de sânge este donator universal?' : 'What blood type is the universal donor?', options: ['A', 'B', 'AB', 'O'], correct: 3 },
-                    { question: currentLang === 'ro' ? 'Câte oase are corpul uman adult?' : 'How many bones does an adult human body have?', options: ['106', '206', '306', '406'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce este ADN-ul?' : 'What is DNA?', options: currentLang === 'ro' ? ['Acid care transportă informația genetică', 'Proteină', 'Lipidă', 'Carbohidrat'] : ['Acid that carries genetic information', 'Protein', 'Lipid', 'Carbohydrate'], correct: 0 },
-                    { question: currentLang === 'ro' ? 'Care este funcția plămânilor?' : 'What is the function of the lungs?', options: currentLang === 'ro' ? ['Pomparea sângelui', 'Respirația', 'Digestia', 'Filtrarea sângelui'] : ['Pumping blood', 'Breathing', 'Digestion', 'Blood filtration'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce regn aparțin bacteriile?' : 'What kingdom do bacteria belong to?', options: ['Monera', 'Protista', 'Fungi', 'Plantae'], correct: 0 }
-                ],
-                engleza: [
-                    { question: currentLang === 'ro' ? 'Care este forma corectă: "He ___ to school every day."' : 'What is the correct form: "He ___ to school every day."', options: ['go', 'goes', 'going', 'went'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cum se traduce "mereu" în engleză?' : 'How do you translate "mereu" into English?', options: ['never', 'always', 'sometimes', 'rarely'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este pluralul lui "child"?' : 'What is the plural of "child"?', options: ['childs', 'children', 'childes', 'childrens'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Ce timp verbal este: "I have eaten"?' : 'What tense is: "I have eaten"?', options: ['Past Simple', 'Present Perfect', 'Past Perfect', 'Present Continuous'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Cum se formează interogativul în Present Simple?' : 'How is the interrogative formed in Present Simple?', options: ['Adding -ing', 'Using do/does', 'Using was/were', 'Adding -ed'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este sinonimul lui "happy"?' : 'What is the synonym of "happy"?', options: ['sad', 'angry', 'joyful', 'tired'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Cum se scrie numărul 40 în engleză?' : 'How do you write the number 40 in English?', options: ['fourty', 'forty', 'fourteen', 'four'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este forma de comparativ a lui "good"?' : 'What is the comparative form of "good"?', options: ['gooder', 'more good', 'better', 'best'], correct: 2 },
-                    { question: currentLang === 'ro' ? 'Ce înseamnă "weather"?' : 'What does "weather" mean?', options: ['Whether', 'Vreme', 'Piele', 'Păun'], correct: 1 },
-                    { question: currentLang === 'ro' ? 'Care este articolul nehotărât pentru cuvinte care încep cu o consoană?' : 'What is the indefinite article for words starting with a consonant?', options: ['an', 'a', 'the', '-'], correct: 1 }
-                ]
-            };
-            
-            // Shuffle and return 10 questions
-            let subjectQuestions = questions[materie] || questions['matematica'];
-            return subjectQuestions.sort(() => 0.5 - Math.random()).slice(0, 10);
-        }
+        addToHistory({ type:'homework', subject:materie, question:intrebare });
+    }
 
-        function showQuestion() {
-            const container = document.getElementById('quiz-container');
-            const t = translations[currentLang];
-            
-            if (currentQuestion >= quizQuestions.length) {
-                showFinalScore();
-                return;
-            }
-            
-            const q = quizQuestions[currentQuestion];
-            
-            let html = `
-                <div class="quiz-question">
-                    <div class="progress-bar" style="margin-bottom: 15px;">
-                        <div class="progress-fill" style="width: ${((currentQuestion + 1) / quizQuestions.length) * 100}%"></div>
-                    </div>
-                    <h3>${t.question} ${currentQuestion + 1}/${quizQuestions.length}</h3>
-                    <p style="font-size: 18px; margin: 15px 0;">${q.question}</p>
-                    <div class="quiz-options">
-            `;
-            
-            q.options.forEach((opt, idx) => {
-                html += `<div class="quiz-option" onclick="selectAnswer(${idx})">${opt}</div>`;
-            });
-            
-            html += '</div></div>';
-            container.innerHTML = html;
-        }
+    // ── Quiz logic (unchanged from original) ─────────────────────────
+    async function startQuiz() {
+        const materie = document.getElementById('quiz-materie').value;
+        const clasa   = document.getElementById('quiz-clasa').value;
+        const container = document.getElementById('quiz-container');
+        const scoreDiv  = document.getElementById('quiz-score');
+        if (!materie || !clasa) { alert(currentLang==='ro'?'Selectează materia și clasa!':'Select subject and grade!'); return; }
+        container.style.display = 'block';
+        scoreDiv.style.display  = 'none';
+        container.innerHTML = '<p class="loading">' + (currentLang==='ro'?'⏳ Se generează întrebările...':'⏳ Generating questions...') + '</p>';
+        quizQuestions = generateSampleQuestions(materie, clasa);
+        currentQuestion = 0; quizScore = 0;
+        setTimeout(() => showQuestion(), 800);
+    }
 
-        function selectAnswer(selected) {
-            const q = quizQuestions[currentQuestion];
-            const options = document.querySelectorAll('.quiz-option');
-            const t = translations[currentLang];
-            
-            options.forEach((opt, idx) => {
-                opt.style.pointerEvents = 'none';
-                if (idx === q.correct) {
-                    opt.classList.add('correct');
-                    opt.innerHTML += ' ✅ ' + t.correct;
-                } else if (idx === selected && idx !== q.correct) {
-                    opt.classList.add('wrong');
-                    opt.innerHTML += ' ❌ ' + t.wrong;
-                }
-            });
-            
-            if (selected === q.correct) {
-                quizScore++;
-            }
-            
-            setTimeout(() => {
-                currentQuestion++;
-                showQuestion();
-            }, 1500);
-        }
+    function generateSampleQuestions(materie) {
+        const questions = {
+            matematica:[
+                {question:currentLang==='ro'?'Care este rezultatul lui 2x + 5 = 15?':'What is the result of 2x + 5 = 15?',options:['x = 5','x = 10','x = 7.5','x = 20'],correct:0},
+                {question:currentLang==='ro'?'Cât este 25% din 80?':'What is 25% of 80?',options:['15','20','25','30'],correct:1},
+                {question:currentLang==='ro'?'Care este formula ariei unui cerc?':'Area of a circle?',options:['πr²','2πr','πd','r²'],correct:0},
+                {question:currentLang==='ro'?'Cât este 3² + 4²?':'What is 3² + 4²?',options:['16','25','49','12'],correct:1},
+                {question:currentLang==='ro'?'CMMMC al numerelor 4 și 6?':'LCM of 4 and 6?',options:['12','24','2','18'],correct:0},
+                {question:currentLang==='ro'?'Cât este √144?':'What is √144?',options:['10','11','12','14'],correct:2},
+                {question:currentLang==='ro'?'Un triunghi cu unghiuri 60°,60°,60° este?':'Triangle with angles 60°,60°,60° is?',options:currentLang==='ro'?['Isoscel','Echilateral','Dreptunghic','Obtuzunghic']:['Isosceles','Equilateral','Right','Obtuse'],correct:1},
+                {question:currentLang==='ro'?'Cât este 0,75 ca fracție?':'What is 0.75 as a fraction?',options:['1/2','2/3','3/4','4/5'],correct:2},
+                {question:currentLang==='ro'?'Perimetrul unui pătrat cu latura 5 cm?':'Perimeter of a square with side 5 cm?',options:['10 cm','15 cm','20 cm','25 cm'],correct:2},
+                {question:currentLang==='ro'?'Cât este 2³ × 2²?':'What is 2³ × 2²?',options:['16','32','64','128'],correct:1}
+            ],
+            romana:[
+                {question:currentLang==='ro'?'Cine a scris "Povestea lui Harap-Alb"?':'Who wrote "Harap-Alb"?',options:['Mihai Eminescu','Ion Creangă','I.L. Caragiale','M. Sadoveanu'],correct:1},
+                {question:currentLang==='ro'?'Ce este o metaforă?':'What is a metaphor?',options:currentLang==='ro'?['Comparație fără cuvinte de legătură','Repetiție de cuvinte','Enumerare','Întrebare retorică']:['Comparison without linking words','Word repetition','Enumeration','Rhetorical question'],correct:0},
+                {question:currentLang==='ro'?'Autorul poeziei "Luceafărul"?':'Author of "Luceafărul"?',options:['George Coșbuc','Mihai Eminescu','Ion Minulescu','Tudor Arghezi'],correct:1},
+                {question:currentLang==='ro'?'"Frumos" este ce parte de vorbire?':'"Beautiful" is what part of speech?',options:currentLang==='ro'?['Substantiv','Adjectiv','Verb','Adverb']:['Noun','Adjective','Verb','Adverb'],correct:1},
+                {question:currentLang==='ro'?'Sinonimul lui "a începe"?':'Synonym of "to begin"?',options:currentLang==='ro'?['A termina','A porni','A opri','A sfârși']:['To finish','To start','To stop','To end'],correct:1},
+                {question:currentLang==='ro'?'În ce secol a trăit Eminescu?':'In what century did Eminescu live?',options:['XVII','XVIII','XIX','XX'],correct:2},
+                {question:currentLang==='ro'?'Ce este un epitet?':'What is an epithet?',options:currentLang==='ro'?['O comparație','Adjectiv care determină un substantiv','O repetiție','O enumerare']:['A comparison','Adjective describing a noun','A repetition','An enumeration'],correct:1},
+                {question:currentLang==='ro'?'Autorul "O scrisoare pierdută"?':'Author of "A Lost Letter"?',options:['Ion Creangă','I.L. Caragiale','M. Sadoveanu','L. Rebreanu'],correct:1},
+                {question:currentLang==='ro'?'Ce este o antiteză?':'What is an antithesis?',options:currentLang==='ro'?['Apropierea unor cuvinte cu sens opus','Repetarea unui cuvânt','O enumerare','O comparație']:['Juxtaposition of contrasting words','Word repetition','Enumeration','Comparison'],correct:0},
+                {question:currentLang==='ro'?'Pluralul lui "copil"?':'Plural of "child"?',options:currentLang==='ro'?['Copili','Copii','Copiii','Copilăi']:['Children','Childs','Childes','Childrens'],correct:1}
+            ],
+            fizica:[
+                {question:currentLang==='ro'?'Unitatea de măsură pentru forță?':'Unit of force?',options:['Watt','Newton','Joule','Pascal'],correct:1},
+                {question:currentLang==='ro'?'Viteza luminii în vid?':'Speed of light in vacuum?',options:['300.000 km/s','150.000 km/s','500.000 km/s','1.000.000 km/s'],correct:0},
+                {question:'Legea lui Ohm?',options:['U = I × R','F = m × a','E = m × c²','P = U × I'],correct:0},
+                {question:currentLang==='ro'?'Unitatea pentru energie?':'Unit of energy?',options:['Newton','Watt','Joule','Pascal'],correct:2},
+                {question:currentLang==='ro'?'Câte stări ale materiei există?':'How many states of matter?',options:['2','3','4','5'],correct:2},
+                {question:currentLang==='ro'?'Densitatea este?':'Density is?',options:currentLang==='ro'?['Masă × Volum','Masă / Volum','Volum / Masă','Masă + Volum']:['Mass × Volume','Mass / Volume','Volume / Mass','Mass + Volume'],correct:1},
+                {question:currentLang==='ro'?'Temperatura de fierbere a apei?':'Boiling point of water?',options:['90°C','100°C','110°C','120°C'],correct:1},
+                {question:currentLang==='ro'?'Formula pentru viteză?':'Formula for speed?',options:['t/d','d/t','d×t','d-t'],correct:1},
+                {question:currentLang==='ro'?'Curentul electric este?':'Electric current is?',options:currentLang==='ro'?['Mișcare de electroni','Mișcare de protoni','Mișcare de neutroni','Căldură']:['Electron movement','Proton movement','Neutron movement','Heat'],correct:0},
+                {question:currentLang==='ro'?'Câte culori are spectrul vizibil?':'Colors in visible spectrum?',options:['5','6','7','8'],correct:2}
+            ],
+            chimie:[
+                {question:currentLang==='ro'?'Simbolul chimic pentru aur?':'Chemical symbol for gold?',options:['Ag','Au','Fe','Cu'],correct:1},
+                {question:currentLang==='ro'?'pH-ul apei pure?':'pH of pure water?',options:['0','7','14','1'],correct:1},
+                {question:currentLang==='ro'?'Formula chimică a apei?':'Chemical formula of water?',options:['CO₂','H₂O','NaCl','O₂'],correct:1},
+                {question:currentLang==='ro'?'Element cu numărul atomic 1?':'Element with atomic number 1?',options:currentLang==='ro'?['Heliu','Hidrogen','Litiu','Carbon']:['Helium','Hydrogen','Lithium','Carbon'],correct:1},
+                {question:currentLang==='ro'?'Un acid are pH?':'An acid has pH?',options:['>7','<7','=7','=14'],correct:1},
+                {question:currentLang==='ro'?'Gazul cel mai abundent în atmosferă?':'Most abundant gas in atmosphere?',options:currentLang==='ro'?['Oxigen','Azot','CO₂','Hidrogen']:['Oxygen','Nitrogen','CO₂','Hydrogen'],correct:1},
+                {question:currentLang==='ro'?'Oxidarea înseamnă?':'Oxidation means?',options:currentLang==='ro'?['Pierdere de electroni','Câștig de electroni','Reacție cu apă','Reacție cu oxigen']:['Loss of electrons','Gain of electrons','Reaction with water','Reaction with oxygen'],correct:0},
+                {question:currentLang==='ro'?'Formula sării de bucătărie?':'Formula of table salt?',options:['HCl','NaOH','NaCl','KCl'],correct:2},
+                {question:currentLang==='ro'?'Câte elemente are tabelul periodic?':'Elements in periodic table?',options:['92','108','118','156'],correct:2},
+                {question:currentLang==='ro'?'Un izotop are?':'An isotope has?',options:currentLang==='ro'?['Același nr protoni, nr diferit neutroni','Același nr neutroni','Ion pozitiv','Ion negativ']:['Same protons, different neutrons','Same neutrons','Positive ion','Negative ion'],correct:0}
+            ],
+            istorie:[
+                {question:currentLang==='ro'?'Anul Unirii Principatelor Române?':'Year of Union of Romanian Principalities?',options:['1848','1859','1877','1918'],correct:1},
+                {question:currentLang==='ro'?'Primul domnitor al României unite?':'First ruler of united Romania?',options:['Carol I','Alexandru Ioan Cuza','Ferdinand I','Mihai Viteazul'],correct:1},
+                {question:currentLang==='ro'?'Anul începerii Primului Război Mondial?':'Year WWI began?',options:['1912','1914','1916','1918'],correct:1},
+                {question:currentLang==='ro'?'Cine a construit Columna lui Traian?':'Who built Trajan\'s Column?',options:['Traian','Decebal','Hadrian','Constantin'],correct:0},
+                {question:currentLang==='ro'?'Anul Marii Uniri?':'Year of Great Union?',options:['1916','1917','1918','1919'],correct:2},
+                {question:currentLang==='ro'?'Conducătorul statului dac în războaiele cu romanii?':'Dacian leader in wars with Romans?',options:['Burebista','Decebal','Comosicus','Duras'],correct:1},
+                {question:currentLang==='ro'?'Anul Revoluției Franceze?':'Year of French Revolution?',options:['1776','1789','1799','1804'],correct:1},
+                {question:currentLang==='ro'?'Cine a descoperit America?':'Who discovered America?',options:['Vasco da Gama','Cristofor Columb','Magellan','Marco Polo'],correct:1},
+                {question:currentLang==='ro'?'Căderea Imperiului Roman de Apus?':'Fall of Western Roman Empire?',options:['376','410','476','500'],correct:2},
+                {question:currentLang==='ro'?'Primul împărat al Romei?':'First emperor of Rome?',options:['Iulius Cezar','Augustus','Nero','Traian'],correct:1}
+            ],
+            geografie:[
+                {question:currentLang==='ro'?'Cel mai înalt vârf din lume?':'Highest peak in the world?',options:['K2','Kilimanjaro','Everest','Matterhorn'],correct:2},
+                {question:currentLang==='ro'?'Cel mai lung fluviu din lume?':'Longest river in the world?',options:['Nil','Amazon','Mississippi','Yangtze'],correct:1},
+                {question:currentLang==='ro'?'Cel mai mare ocean?':'Largest ocean?',options:['Atlantic','Indian','Arctic','Pacific'],correct:3},
+                {question:currentLang==='ro'?'Capitala Franței?':'Capital of France?',options:['Londra','Berlin','Paris','Madrid'],correct:2},
+                {question:currentLang==='ro'?'Câte continente există?':'How many continents?',options:['5','6','7','8'],correct:2},
+                {question:currentLang==='ro'?'Cel mai mare deșert din lume?':'Largest desert in the world?',options:['Sahara','Gobi','Antarctica','Kalahari'],correct:2},
+                {question:currentLang==='ro'?'Muntele Fuji se află în?':'Mount Fuji is in?',options:currentLang==='ro'?['China','Coreea de Sud','Japonia','Thailanda']:['China','South Korea','Japan','Thailand'],correct:2},
+                {question:currentLang==='ro'?'Cel mai mare lac ca suprafață?':'Largest lake by surface?',options:currentLang==='ro'?['Lacul Baikal','Lacul Superior','Marea Caspică','Lacul Victoria']:['Lake Baikal','Lake Superior','Caspian Sea','Lake Victoria'],correct:2},
+                {question:currentLang==='ro'?'Prin câte țări trece Dunărea?':'How many countries does the Danube flow through?',options:['8','9','10','12'],correct:2},
+                {question:currentLang==='ro'?'Cel mai mic stat din lume?':'Smallest country in the world?',options:['Monaco','San Marino','Vatican','Liechtenstein'],correct:2}
+            ],
+            biologie:[
+                {question:currentLang==='ro'?'Unitatea de bază a vieții?':'Basic unit of life?',options:currentLang==='ro'?['Țesut','Organ','Celulă','Moleculă']:['Tissue','Organ','Cell','Molecule'],correct:2},
+                {question:currentLang==='ro'?'Organela care produce energie?':'Organelle that produces energy?',options:['Nucleu','Ribozom','Mitocondrie','Lizozom'],correct:2},
+                {question:currentLang==='ro'?'Câte perechi de cromozomi au oamenii?':'Human chromosome pairs?',options:['22','23','24','46'],correct:1},
+                {question:currentLang==='ro'?'Fotosinteza este?':'Photosynthesis is?',options:currentLang==='ro'?['Producere energie','Conversie lumină→energie chimică','Respirație','Digestie']:['Energy production','Light→chemical energy conversion','Respiration','Digestion'],correct:1},
+                {question:currentLang==='ro'?'Cel mai mare organ al corpului uman?':'Largest human organ?',options:currentLang==='ro'?['Ficat','Creier','Piele','Inimă']:['Liver','Brain','Skin','Heart'],correct:2},
+                {question:currentLang==='ro'?'Tipul de sânge donator universal?':'Universal blood donor type?',options:['A','B','AB','O'],correct:3},
+                {question:currentLang==='ro'?'Câte oase are adultul?':'Bones in adult human body?',options:['106','206','306','406'],correct:1},
+                {question:currentLang==='ro'?'ADN-ul este?':'DNA is?',options:currentLang==='ro'?['Acid cu informație genetică','Proteină','Lipidă','Carbohidrat']:['Acid with genetic info','Protein','Lipid','Carbohydrate'],correct:0},
+                {question:currentLang==='ro'?'Funcția plămânilor?':'Function of lungs?',options:currentLang==='ro'?['Pomparea sângelui','Respirația','Digestia','Filtrarea sângelui']:['Pump blood','Breathing','Digestion','Filter blood'],correct:1},
+                {question:currentLang==='ro'?'Bacteriile aparțin regnului?':'Bacteria belong to kingdom?',options:['Monera','Protista','Fungi','Plantae'],correct:0}
+            ],
+            engleza:[
+                {question:'"He ___ to school every day."',options:['go','goes','going','went'],correct:1},
+                {question:currentLang==='ro'?'"Mereu" în engleză?':'Romanian "mereu" in English?',options:['never','always','sometimes','rarely'],correct:1},
+                {question:'Plural of "child"?',options:['childs','children','childes','childrens'],correct:1},
+                {question:'"I have eaten" is?',options:['Past Simple','Present Perfect','Past Perfect','Present Continuous'],correct:1},
+                {question:currentLang==='ro'?'Interogativul în Present Simple se formează cu?':'Present Simple question uses?',options:['Adding -ing','do/does','was/were','Adding -ed'],correct:1},
+                {question:'Synonym of "happy"?',options:['sad','angry','joyful','tired'],correct:2},
+                {question:'How to write 40?',options:['fourty','forty','fourteen','four'],correct:1},
+                {question:'Comparative of "good"?',options:['gooder','more good','better','best'],correct:2},
+                {question:'"Weather" means?',options:['Whether','Vreme/Weather','Skin','Peacock'],correct:1},
+                {question:currentLang==='ro'?'Articol nehotărât înaintea consoanei?':'Indefinite article before consonant?',options:['an','a','the','-'],correct:1}
+            ]
+        };
+        return (questions[materie] || questions.matematica).sort(() => 0.5 - Math.random()).slice(0,10);
+    }
 
-        function showFinalScore() {
-            const container = document.getElementById('quiz-container');
-            const scoreDiv = document.getElementById('quiz-score');
-            const t = translations[currentLang];
-            
-            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
-            const materie = document.getElementById('quiz-materie').value;
-            const clasa = document.getElementById('quiz-clasa').value;
-            
-            // Save to history
-            addToHistory({
-                type: 'quiz',
-                subject: materie,
-                grade: clasa,
-                score: quizScore,
-                total: quizQuestions.length,
-                percentage: percentage
-            });
-            
-            container.innerHTML = '';
-            scoreDiv.style.display = 'block';
-            scoreDiv.innerHTML = `
-                ${t.finalScore}: ${quizScore}/${quizQuestions.length}<br>
-                <span style="font-size: 18px;">${percentage}%</span>
-                <div class="progress-bar" style="margin-top: 10px;">
-                    <div class="progress-fill" style="width: ${percentage}%"></div>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                alert(t.congratulations + ' ' + percentage + '%');
-            }, 500);
-        }
+    function showQuestion() {
+        const container = document.getElementById('quiz-container');
+        const t = translations[currentLang];
+        if (currentQuestion >= quizQuestions.length) { showFinalScore(); return; }
+        const q = quizQuestions[currentQuestion];
+        let html = `<div class="quiz-question">
+            <div class="progress-bar" style="margin-bottom:15px;">
+                <div class="progress-fill" style="width:${((currentQuestion+1)/quizQuestions.length)*100}%"></div>
+            </div>
+            <h3>${t.question} ${currentQuestion+1}/${quizQuestions.length}</h3>
+            <p style="font-size:18px;margin:15px 0;">${q.question}</p>
+            <div class="quiz-options">`;
+        q.options.forEach((opt,idx) => { html += `<div class="quiz-option" onclick="selectAnswer(${idx})">${opt}</div>`; });
+        html += '</div></div>';
+        container.innerHTML = html;
+    }
 
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-            }
-        }
+    function selectAnswer(selected) {
+        const q = quizQuestions[currentQuestion];
+        const opts = document.querySelectorAll('.quiz-option');
+        const t = translations[currentLang];
+        opts.forEach((opt,idx) => {
+            opt.style.pointerEvents = 'none';
+            if (idx === q.correct) { opt.classList.add('correct'); opt.innerHTML += ' ✅ ' + t.correct; }
+            else if (idx === selected && idx !== q.correct) { opt.classList.add('wrong'); opt.innerHTML += ' ❌ ' + t.wrong; }
+        });
+        if (selected === q.correct) quizScore++;
+        setTimeout(() => { currentQuestion++; showQuestion(); }, 1500);
+    }
+
+    function showFinalScore() {
+        const container = document.getElementById('quiz-container');
+        const scoreDiv  = document.getElementById('quiz-score');
+        const t = translations[currentLang];
+        const pct = Math.round((quizScore/quizQuestions.length)*100);
+        const materie = document.getElementById('quiz-materie').value;
+        const clasa   = document.getElementById('quiz-clasa').value;
+        addToHistory({ type:'quiz', subject:materie, grade:clasa, score:quizScore, total:quizQuestions.length, percentage:pct });
+        container.innerHTML = '';
+        scoreDiv.style.display = 'block';
+        scoreDiv.innerHTML = `${t.finalScore}: ${quizScore}/${quizQuestions.length}<br><span style="font-size:18px;">${pct}%</span><div class="progress-bar" style="margin-top:10px;"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+        setTimeout(() => { alert(t.congratulations + ' ' + pct + '%'); }, 500);
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal')) e.target.classList.remove('active');
+    };
     </script>
 </body>
 </html>
