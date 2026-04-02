@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBot 3000 PRO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+        }
+
+        /* Particle Canvas */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(240, 147, 251, 0.4); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: radial-gradient(circle at center, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .start-title {
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a8b2ff 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease infinite;
+            margin-bottom: 10px;
+            text-align: center;
+            filter: drop-shadow(0 0 30px rgba(102, 126, 234, 0.5));
+        }
+
+        .start-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 50px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .robot-container {
+            position: relative;
+            width: 300px;
+            height: 350px;
+            margin: 30px 0;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .robot-head {
+            position: absolute;
+            width: 160px;
+            height: 140px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(226,232,240,0.9) 100%);
+            border-radius: 40px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 -5px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .robot-antenna {
+            position: absolute;
+            width: 12px;
+            height: 40px;
+            background: linear-gradient(to bottom, #64748b, #94a3b8);
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 6px;
+        }
+
+        .robot-antenna::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 50%;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 30px #fbbf24, 0 0 60px rgba(251, 191, 36, 0.5);
+            animation: pulse-glow 2s infinite;
+        }
+
+        .robot-face {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .robot-eye {
+            position: absolute;
+            width: 35px;
+            height: 45px;
+            background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+            border-radius: 50%;
+            top: 0;
+            animation: blink 4s infinite;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        .robot-eye.left { left: 10px; }
+        .robot-eye.right { right: 10px; }
+
+        .robot-eye::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 10px;
+            right: 8px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        .robot-mouth {
+            position: absolute;
+            width: 50px;
+            height: 25px;
+            border: 4px solid #1e293b;
+            border-top: none;
+            border-radius: 0 0 50px 50px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .robot-body {
+            position: absolute;
+            width: 200px;
+            height: 180px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(226,232,240,0.9) 100%);
+            border-radius: 50px;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .robot-chest {
+            position: absolute;
+            width: 130px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 25px;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 2px;
+            box-shadow: inset 0 2px 10px rgba(255,255,255,0.3);
+        }
+
+        .robot-arm {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(145deg, rgba(226,232,240,0.9) 0%, rgba(203,213,225,0.9) 100%);
+            border-radius: 30px;
+            top: 150px;
+        }
+
+        .robot-arm.left {
+            left: 10px;
+            transform: rotate(-20deg);
+            transform-origin: top center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .robot-arm.right {
+            right: 10px;
+            transform: rotate(20deg);
+            transform-origin: top center;
+            animation: float 3s ease-in-out infinite 0.5s reverse;
+        }
+
+        /* Menu Options */
+        .menu-options {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+            z-index: 100;
+        }
+
+        .menu-card {
+            width: 200px;
+            height: 200px;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .menu-card:hover::before {
+            opacity: 1;
+        }
+
+        .menu-card.homework {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(34, 197, 94, 0.3) 100%);
+            border: 2px solid rgba(74, 222, 128, 0.5);
+        }
+
+        .menu-card.quiz {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(245, 158, 11, 0.3) 100%);
+            border: 2px solid rgba(251, 191, 36, 0.5);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+
+        .menu-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        .menu-text {
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* App Container */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        .app-container.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            z-index: 1000;
+            transition: all 0.3s;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-10px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 40px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            z-index: 1000;
+            animation: slideInUp 0.6s ease;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a8b2ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 120px 20px 50px;
+        }
+
+        .content-card {
+            display: none;
+            animation: slideInUp 0.6s ease;
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .card-header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 0%, #a8b2ff 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-header p {
+            color: rgba(255,255,255,0.6);
+            font-size: 18px;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        /* AI Selector */
+        .ai-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .selector-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select select {
+            width: 100%;
+            padding: 18px 25px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s;
+        }
+
+        .custom-select select:hover {
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(0,0,0,0.4);
+        }
+
+        .custom-select select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .custom-select::after {
+            content: '▼';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.6);
+            pointer-events: none;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .custom-input, .custom-textarea {
+            width: 100%;
+            padding: 20px 25px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .custom-input:focus, .custom-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            background: rgba(0,0,0,0.4);
+        }
+
+        .custom-textarea {
+            min-height: 200px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .custom-input::placeholder, .custom-textarea::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            padding: 22px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Response Area */
+        .response-area {
+            margin-top: 30px;
+            border-radius: 25px;
+            padding: 35px;
+            display: none;
+            animation: slideInUp 0.5s ease;
+            border-left: 5px solid var(--primary);
+        }
+
+        .response-area.active {
+            display: block;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .response-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .response-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .response-model {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .response-content {
+            line-height: 1.9;
+            font-size: 17px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .response-content strong {
+            color: #fff;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error/Success States */
+        .alert-box {
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-box.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+        }
+
+        .alert-box.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #86efac;
+        }
+
+        .alert-box.warning {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            color: #fde047;
+        }
+
+        /* Fact Check Badge */
+        .fact-check {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 15px;
+            display: flex;
+            align-items: start;
+            gap: 15px;
+        }
+
+        .fact-check-icon {
+            font-size: 24px;
+        }
+
+        .fact-check-content {
+            flex: 1;
+        }
+
+        .fact-check-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #93c5fd;
+        }
+
+        .fact-check-text {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .start-title { font-size: 40px; }
+            .menu-options { flex-direction: column; gap: 20px; }
+            .menu-card { width: 160px; height: 160px; }
+            .robot-container { transform: scale(0.8); }
+            .navbar { left: 20px; right: 20px; transform: none; width: calc(100% - 40px); }
+            .main-wrapper { padding-top: 140px; }
+            .glass-card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- START SCREEN -->
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">StudyBot 3000 PRO</h1>
+        <p class="start-subtitle">Învață inteligent, nu greu</p>
+        
+        <div class="robot-container">
+            <div class="robot-head">
+                <div class="robot-antenna"></div>
+                <div class="robot-face">
+                    <div class="robot-eye left"></div>
+                    <div class="robot-eye right"></div>
+                    <div class="robot-mouth"></div>
+                </div>
+            </div>
+            <div class="robot-body">
+                <div class="robot-chest">AI POWER</div>
+            </div>
+            <div class="robot-arm left"></div>
+            <div class="robot-arm right"></div>
+        </div>
+
+        <div class="menu-options">
+            <div class="menu-card homework glass" onclick="startApp('homework')">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">Rezolvă<br>Teme</span>
+            </div>
+            <div class="menu-card quiz glass" onclick="startApp('quiz')">
+                <span class="menu-icon">🎮</span>
+                <span class="menu-text">Quiz<br>Interactiv</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <button class="back-btn glass" onclick="goBack()" id="backBtn">
+        ← Înapoi
+    </button>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container" id="appContainer">
+        <nav class="navbar glass">
+            <div class="nav-logo">🤖 StudyBot PRO</div>
+            <div class="nav-controls">
+                <button class="nav-btn" onclick="toggleTheme()">🌙 Temă</button>
+            </div>
+        </nav>
+
+        <div class="main-wrapper">
+            <!-- HOMEWORK MODULE -->
+            <div class="content-card active" id="homework-card">
+                <div class="card-header">
+                    <h1>Rezolvător Inteligent</h1>
+                    <p>AI avansat pentru teme precise și verificate</p>
+                </div>
+
+                <div class="glass-card glass">
+                    <div class="ai-selector">
+                        <label class="selector-label">🤖 Selectează Modelul AI</label>
+                        <div class="custom-select">
+                            <select id="aiModel" onchange="saveModelPreference()">
+                                <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (Cel mai precis)</option>
+                                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Multilingv)</option>
+                                <option value="google/gemma-3-27b-it:free">Gemma 3 27B (Rapid)</option>
+                                <option value="openrouter/free">Auto-Select (Cel mai disponibil)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card glass">
+                    <div class="input-group">
+                        <label class="input-label">📚 Materia</label>
+                        <div class="custom-select">
+                            <select id="materie" class="custom-input">
+                                <option value="">Selectează materia...</option>
+                                <option value="matematica">📐 Matematică</option>
+                                <option value="romana">📖 Limba Română & Literatură</option>
+                                <option value="fizica">⚡ Fizică</option>
+                                <option value="chimie">🧪 Chimie</option>
+                                <option value="istorie">🏛️ Istorie</option>
+                                <option value="geografie">🌍 Geografie</option>
+                                <option value="biologie">🧬 Biologie</option>
+                                <option value="engleza">🇬🇧 Engleză</option>
+                                <option value="informatica">💻 Informatică</option>
+                                <option value="logica">🧩 Logică</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">✏️ Întrebarea Ta</label>
+                        <textarea 
+                            id="intrebare" 
+                            class="custom-textarea" 
+                            placeholder="Exemple:
+• 'Când a fost publicată „Moara cu noroc" și în ce revistă?'
+• 'Rezolvă ecuația: 2x² + 5x - 3 = 0'
+• 'Explică legile lui Kepler'
+• 'Ce este un silogism categoric?'"
+                        ></textarea>
+                    </div>
+
+                    <button class="btn-primary" onclick="rezolva()" id="solveBtn">
+                        🔍 Analizează cu AI
+                    </button>
+                </div>
+
+                <div class="response-area glass" id="responseArea">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIGURAȚIE - CHEIA TA API (ASCUNSĂ ÎN COD)
+        // ═══════════════════════════════════════════════════════════════════
+        const API_KEY = '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';
+        
+        // State
+        let currentModel = localStorage.getItem('studybot_model') || 'deepseek/deepseek-chat-v3-0324:free';
+        let isProcessing = false;
+
+        // Initialize
+        document.getElementById('aiModel').value = currentModel;
+        initParticles();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // PARTICLE SYSTEM
+        // ═══════════════════════════════════════════════════════════════════
+        function initParticles() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            const particles = [];
+            const particleCount = 50;
+            
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.radius = Math.random() * 3 + 1;
+                    this.color = `rgba(${100 + Math.random() * 155}, ${100 + Math.random() * 155}, 255, ${Math.random() * 0.5})`;
+                }
+                
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                }
+                
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                
+                // Conectări între particule apropiate
+                particles.forEach((p1, i) => {
+                    particles.slice(i + 1).forEach(p2 => {
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(100, 126, 234, ${0.1 * (1 - dist/150)})`;
+                            ctx.stroke();
+                        }
+                    });
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SYSTEM PROMPT ULTRA-PRECIS
+        // ═══════════════════════════════════════════════════════════════════
+        function getSystemPrompt(materie) {
+            const materii = {
+                'matematica': 'matematică',
+                'romana': 'limba română și literatura română',
+                'fizica': 'fizică',
+                'chimie': 'chimie',
+                'istorie': 'istorie',
+                'geografie': 'geografie',
+                'biologie': 'biologie',
+                'engleza': 'limba engleză',
+                'informatica': 'informatică',
+                'logica': 'logică'
+            };
+
+            return `Ești un profesor expert în ${materii[materie] || 'diverse discipline'} pentru învățământul preuniversitar din România.
+
+REGULI STRICTE DE PRECIZIE:
+
+1. DATE ISTORICE ȘI LITERARE:
+   - Pentru opere literare românești, verifică: anul exact al publicării, revista/sursa, autorul
+   - Exemple corecte: "Moara cu noroc" - 1881 în "Convorbiri Literare"; "Ion" - 1920; "Enigma Otiliei" - 1938
+   - Dacă nu ești 100% sigur de o dată, spune "Conform surselor..." sau "Aproximativ..."
+
+2. MATEMATICĂ ȘI ȘTIINȚE:
+   - Verifică calculele pas cu pas
+   - Arată rezolvarea completă, nu doar răspunsul final
+   - Folosește notații corecte
+
+3. LIMBA ȘI LITERATURA ROMÂNĂ:
+   - Nu inventa citate. Folosește formulări precum "Conform ideii autorului..." dacă nu ești sigur de textul exact
+   - Specifică sursa citatelor (opera, autorul)
+   - Fii precis cu termeni literari (metaforă, simbol, motiv, temă)
+
+4. GENERAL:
+   - Dacă nu știi sigur, recunoaște: "Nu am informații suficiente despre acest subiect"
+   - Nu ghici niciodată date, nume sau ani
+   - Prioritizează acuratețea în locul volumului de informații
+
+Răspunde în limba română, clar și structurat.`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // NAVIGAȚIE
+        // ═══════════════════════════════════════════════════════════════════
+        function startApp(mode) {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('appContainer').classList.add('active');
+            document.getElementById('backBtn').style.display = 'flex';
+            
+            // Animație de tranziție
+            document.querySelector('.app-container').style.animation = 'none';
+            setTimeout(() => {
+                document.querySelector('.app-container').style.animation = 'fadeIn 0.6s ease';
+            }, 10);
+        }
+
+        function goBack() {
+            document.getElementById('startScreen').classList.remove('hidden');
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('responseArea').classList.remove('active');
+            document.getElementById('responseArea').innerHTML = '';
+        }
+
+        function saveModelPreference() {
+            currentModel = document.getElementById('aiModel').value;
+            localStorage.setItem('studybot_model', currentModel);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // FUNCȚIA AI CU FALLBACK ȘI RETRY
+        // ═══════════════════════════════════════════════════════════════════
+        async function callAI(text, materie) {
+            const models = [
+                currentModel,
+                'deepseek/deepseek-chat-v3-0324:free',
+                'meta-llama/llama-3.3-70b-instruct:free',
+                'google/gemma-3-27b-it:free',
+                'openrouter/free'
+            ];
+
+            const uniqueModels = [...new Set(models)]; // Elimină duplicatele
+
+            for (let i = 0; i < uniqueModels.length; i++) {
+                try {
+                    console.log(`Încerc modelul: ${uniqueModels[i]}`);
+                    
+                    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${API_KEY}`,
+                            'HTTP-Referer': window.location.href,
+                            'X-Title': 'StudyBot 3000 PRO'
+                        },
+                        body: JSON.stringify({
+                            model: uniqueModels[i],
+                            messages: [
+                                { role: 'system', content: getSystemPrompt(materie) },
+                                { role: 'user', content: text }
+                            ],
+                            temperature: 0.2, // Foarte scăzut pentru precizie maximă
+                            max_tokens: 2000
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMsg = errorData.error?.message || '';
+                        
+                        // Dacă e eroare de model, continuă cu următorul
+                        if (errorMsg.includes('model') || errorMsg.includes('Provider') || 
+                            errorMsg.includes('availability') || response.status === 404 || 
+                            response.status === 429) {
+                            console.warn(`Model ${uniqueModels[i]} indisponibil, încerc următorul...`);
+                            continue;
+                        }
+                        
+                        throw new Error(errorMsg || `Eroare HTTP: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Salvează modelul care a funcționat
+                    if (uniqueModels[i] !== currentModel && uniqueModels[i] !== 'openrouter/free') {
+                        currentModel = uniqueModels[i];
+                        document.getElementById('aiModel').value = currentModel;
+                        localStorage.setItem('studybot_model', currentModel);
+                    }
+                    
+                    return {
+                        content: data.choices[0].message.content,
+                        model: uniqueModels[i],
+                        usage: data.usage
+                    };
+
+                } catch (error) {
+                    console.error(`Eroare cu ${uniqueModels[i]}:`, error);
+                    if (i === uniqueModels.length - 1) throw error;
+                    // Așteaptă 500ms înainte de retry
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            }
+            
+            throw new Error('Toate modelele sunt indisponibile momentan. Încearcă din nou în câteva secunde.');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // FUNCȚIA PRINCIPALĂ - REZOLVĂ
+        // ═══════════════════════════════════════════════════════════════════
+        async function rezolva() {
+            if (isProcessing) return;
+            
+            const materie = document.getElementById('materie').value;
+            const intrebare = document.getElementById('intrebare').value.trim();
+            const responseArea = document.getElementById('responseArea');
+            const solveBtn = document.getElementById('solveBtn');
+
+            // Validare
+            if (!materie) {
+                showAlert('Selectează o materie!', 'error');
+                document.getElementById('materie').parentElement.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    document.getElementById('materie').parentElement.style.animation = '';
+                }, 500);
+                return;
+            }
+            
+            if (!intrebare) {
+                showAlert('Scrie o întrebare!', 'error');
+                document.getElementById('intrebare').focus();
+                return;
+            }
+
+            // UI Loading State
+            isProcessing = true;
+            responseArea.classList.add('active');
+            responseArea.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p style="color: rgba(255,255,255,0.7);">🤖 AI-ul analizează cu atenție...</p>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 10px;">Mod precizie maximă activat</p>
+                </div>
+            `;
+            solveBtn.disabled = true;
+            solveBtn.innerHTML = '⏳ Se procesează...';
+
+            try {
+                const result = await callAI(intrebare, materie);
+                const modelName = result.model.split('/')[1].split(':')[0];
+                
+                // Verifică dacă întrebarea conține elemente factuale
+                const needsFactCheck = /când|anul|data|publicat|scris|născut|a murit|revoluție|bătălie/i.test(intrebare);
+                
+                let factCheckHtml = '';
+                if (needsFactCheck) {
+                    factCheckHtml = `
+                        <div class="fact-check">
+                            <span class="fact-check-icon">⚠️</span>
+                            <div class="fact-check-content">
+                                <div class="fact-check-title">Verificare Recomandată</div>
+                                <div class="fact-check-text">
+                                    Acest răspuns conține date istorice sau biografice. 
+                                    Pentru lucrări școlare importante, verifică informațiile din manualul de specialitate 
+                                    sau surse academice de încredere.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Formatare răspuns
+                let formattedContent = result.content
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+                responseArea.innerHTML = `
+                    <div class="response-header">
+                        <div class="response-icon">📘</div>
+                        <div class="response-title">Răspuns AI</div>
+                        <div class="response-model">${modelName}</div>
+                    </div>
+                    <div class="response-content">
+                        <p>${formattedContent}</p>
+                    </div>
+                    ${factCheckHtml}
+                `;
+
+            } catch (error) {
+                let errorMessage = error.message;
+                let suggestion = '';
+                
+                if (errorMessage.includes('401')) {
+                    errorMessage = 'Cheie API invalidă sau expirată.';
+                    suggestion = 'Contactează administratorul pentru o cheie nouă.';
+                } else if (errorMessage.includes('429')) {
+                    errorMessage = 'Prea multe cereri. Rate limit atins.';
+                    suggestion = 'Așteaptă 30 de secunde și reîncearcă, sau schimbă modelul AI.';
+                } else if (errorMessage.includes('availability') || errorMessage.includes('models')) {
+                    errorMessage = 'Toate modelele sunt ocupate momentan.';
+                    suggestion = 'Încearcă din nou în câteva secunde sau selectează "Auto-Select".';
+                }
+
+                responseArea.innerHTML = `
+                    <div class="alert-box error">
+                        <span style="font-size: 24px;">❌</span>
+                        <div>
+                            <strong>Eroare:</strong> ${errorMessage}<br>
+                            <span style="font-size: 14px; opacity: 0.8;">${suggestion}</span>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                isProcessing = false;
+                solveBtn.disabled = false;
+                solveBtn.innerHTML = '🔍 Analizează cu AI';
+            }
+        }
+
+        function showAlert(message, type) {
+            // Poți extinde pentru toast notifications
+            alert(message);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('appContainer').classList.contains('active')) {
+                goBack();
+            }
+            if (e.key === 'Enter' && e.ctrlKey && document.getElementById('appContainer').classList.contains('active')) {
+                rezolva();
+            }
+        });
+
+        console.log('✅ StudyBot 3000 PRO initialized');
+    </script>
+</body>
+</html>
